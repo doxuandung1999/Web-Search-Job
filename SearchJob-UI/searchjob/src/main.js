@@ -12,7 +12,7 @@ import { Editor } from '@progress/kendo-editor-vue-wrapper'
 // import { EditorTool } from '@progress/kendo-editor-vue-wrapper'
 import { EditorInstaller } from '@progress/kendo-editor-vue-wrapper'
 import './axios'
-
+import "./assets/scss/util.scss"
 Vue.config.productionTip = false
 Vue.use(EditorInstaller)
 
