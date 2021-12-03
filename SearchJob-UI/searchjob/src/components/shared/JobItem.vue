@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <v-card class="hov-pointer pos-relative">
+    <v-card class="hov-pointer pos-relative" @click="navigateDetail(data)">
       <div class="flex-m wrap">
         <div class="image">
           <img v-bind:src="data.Image" alt="" />
@@ -44,6 +44,9 @@ export default {
   methods: {
     toggleFavourite() {
       this.data.IsFavourite = !this.data.IsFavourite;
+    },
+    navigateDetail(data) {
+      this.$router.push({ name: "job-detail", params: { jobID: data.JobID } });
     },
   },
   mounted() {

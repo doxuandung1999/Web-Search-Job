@@ -29,6 +29,11 @@ export default new Router({
                     component : () => import ('@/components/pages/JobPage.vue'),
                 },
                 {
+                    path : "job/:jobID",
+                    name: "job-detail",
+                    component : () => import ('@/components/pages/JobPageDetail.vue'),
+                },
+                {
                     path : "job-care",
                     name: "job-care",
                     component : () => import ('@/components/pages/JobCarePage.vue'),

@@ -68,7 +68,8 @@ export default {
           "https://cdn.topcv.vn/140/company_logos/cong-ty-tnhh-ryon-61a5d0504bc17.jpg",
           null,
           true,
-          null
+          null,
+          1
         ),
         new JobItemModel(
           "Sale Marketing (Lương >35 Triệu) Làm Việc Tại Philippines",
@@ -76,7 +77,8 @@ export default {
           "https://cdn.topcv.vn/80/company_logos/64959bdddd1eb3d04aa0958133ba16b6-5e1d3ac405e7d.jpg",
           null,
           false,
-          null
+          null,
+          2
         ),
         new JobItemModel(
           "Giảng Viên Dạy Tiếng Anh (Ielts & Giao Tiếp) - Thu Nhập Hấp Dẫn - Toàn Quốc",
@@ -84,7 +86,8 @@ export default {
           "https://cdn.topcv.vn/80/company_logos/cong-ty-co-phan-dau-tu-giao-duc-va-phat-trien-nguon-luc-quoc-te-pasal-5ad4093c6754b_rs.jpg",
           null,
           false,
-          null
+          null,
+          3
         ),
       );
     },
