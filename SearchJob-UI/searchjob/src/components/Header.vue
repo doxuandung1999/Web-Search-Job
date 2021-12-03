@@ -18,6 +18,7 @@
         v-for="menu in menus"
         :key="menu.title"
         :to="menu.route"
+        replace
         link
       >
         <v-list-item-title class="font-family-app">{{
