@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="position: relative;">
     <Header />
     <v-main class="d-lex">
       <Search :hidden="checkHide"></Search>
@@ -22,6 +22,13 @@ export default {
   data: () => ({
     checkHide: false,
   }),
+  created(){
+     if (this.$route.name == "company" || this.$route.name == "recruit") {
+        this.checkHide = true;
+      } else {
+        this.checkHide = false;
+      }
+  },
   watch: {
     $route(to) {
       if (to.name == "company" || to.name == "recruit") {
@@ -33,3 +40,12 @@ export default {
   },
 };
 </script>
+<style scoped>
+.h-alert {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 250px;
+  z-index: 9999;
+}
+</style>

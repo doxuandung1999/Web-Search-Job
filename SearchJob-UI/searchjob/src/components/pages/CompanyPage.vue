@@ -4,12 +4,10 @@
       class="d-flex justify-center align-center pb-10"
       style="background-color: #f0f0f0; padding: 20px 0 0"
     >
+      <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
+        messageAlert
+      }}</v-alert>
       <v-col cols="10" class="pt-0 content" style="background-color: #f0f0f0">
-        <v-row>
-          <div>
-            <v-alert type="success"> I'm a success alert. </v-alert>
-          </div>
-        </v-row>
         <v-row style="background-color: white">
           <div style="width: 100%; position: relative">
             <v-img height="236px" :src="banner" width="100%"></v-img>
@@ -110,6 +108,8 @@
                 color="success"
                 class="font-family-app text-none"
                 small
+                @click="updateCompanyName"
+                :loading="isLoadingName"
                 >Lưu</v-btn
               >
               <v-btn
@@ -127,8 +127,9 @@
               <v-text-field
                 :class="{ disable: isEditName }"
                 color="#4caf50"
-                class="pl-2"
+                class="pl-2 my-font"
                 v-model="company.companyName"
+                style="font-size: 18px;"
                 hide-details="true"
               ></v-text-field>
             </div>
@@ -163,6 +164,8 @@
                     color="success"
                     class="font-family-app text-none"
                     small
+                    @click="updateCompanyDescribe"
+                    :loading="isLoadingDescribe"
                     >Lưu</v-btn
                   >
                   <v-btn
@@ -176,8 +179,8 @@
                   >
                 </div>
               </div>
-              <div :class="{ disable: !isEdit }">
-                {{ company.companyDescriber }}
+              <div :class="{ disable: !isEdit }" v-html="company.companyDescriber">
+                
               </div>
               <div :class="{ disable: isEdit }">
                 <editor
@@ -214,6 +217,8 @@
                     color="success"
                     class="font-family-app text-none"
                     small
+                    @click="updateCompanyLocation"
+                    :loading="isLoadingLocation"
                     >Lưu</v-btn
                   >
                   <v-btn
@@ -241,7 +246,8 @@
               <v-text-field
                 :class="{ disable: isEditLocation }"
                 color="#4caf50"
-                class="pl-2"
+                class="pl-2 my-font"
+                style="font-size: 14px;"
                 v-model="company.address"
                 prepend-inner-icon="mdi-map-marker"
                 hide-details="true"
@@ -287,15 +293,22 @@ export default {
     company: null,
     location: null,
     htmlText: null,
+    typeAlert: "success",
+    isShowAddler: false,
+    messageAlert: "",
+    companyStorage: null,
+    isLoadingName: false,
+    isLoadingDescribe: false,
+    isLoadingLocation: false,
   }),
   created() {
-    console.log("b");
     if (this.$route.query.id) {
       console.log("a");
     } else {
       if (sessionStorage.getItem("user") != null) {
         var user = JSON.parse(sessionStorage.getItem("user"));
-        this.company = user.company;
+        this.companyStorage = user.company;
+        this.company = { ...user.company };
         if (this.company.companyAvatar != null) {
           this.avatar = this.company.companyAvatar;
         }
@@ -316,22 +329,34 @@ export default {
   },
 
   methods: {
+    // show thông báo
+    showAlert(typeAlert, messageAlert) {
+      this.typeAlert = typeAlert;
+      this.messageAlert = messageAlert;
+      this.isShowAddler = true;
+      setTimeout(() => {
+        this.isShowAddler = false;
+      }, 3000);
+      // setTimeout(this.isShowAddler = false, 3000);
+    },
     onBannerPick(event) {
       const filebanner = event.target.files;
       const filereader = new FileReader();
       filereader.addEventListener("load", () => {
         this.banner = filereader.result;
-
-        this.company.companyBanner = this.banner;
+        this.companyStorage.companyBanner = this.banner;
         axios
-          .post("company/updatecompany", this.company)
+          .post("company/updatecompany", this.companyStorage)
           .then((res) => {
             var user = JSON.parse(sessionStorage.getItem("user"));
             user.company = res.data.data;
             sessionStorage.removeItem("user");
             sessionStorage.setItem("user", JSON.stringify(user));
+            this.showAlert("success", "Chỉnh sửa thành công");
           })
-          .catch(() => {});
+          .catch(() => {
+            this.showAlert("error", "Chỉnh sửa thất bại");
+          });
       });
       filereader.readAsDataURL(filebanner[0]);
 
@@ -343,10 +368,88 @@ export default {
       const filereader = new FileReader();
       filereader.addEventListener("load", () => {
         this.avatar = filereader.result;
+
+        this.companyStorage.companyAvatar = this.avatar;
+        axios
+          .post("company/updatecompany", this.companyStorage)
+          .then((res) => {
+            var user = JSON.parse(sessionStorage.getItem("user"));
+            user.company = res.data.data;
+            sessionStorage.removeItem("user");
+            sessionStorage.setItem("user", JSON.stringify(user));
+            this.showAlert("success", "Chỉnh sửa thành công");
+          })
+          .catch(() => {
+            this.showAlert("error", "Chỉnh sửa thất bại");
+          });
       });
       filereader.readAsDataURL(filebanner[0]);
       // console.log(this.banner);
     },
+
+    // sửa tên cty
+    updateCompanyName() {
+      this.companyStorage.companyName = this.company.companyName;
+      this.isLoadingName = true;
+      axios
+        .post("company/updatecompany", this.companyStorage)
+        .then((res) => {
+          var user = JSON.parse(sessionStorage.getItem("user"));
+          user.company = res.data.data;
+          sessionStorage.removeItem("user");
+          sessionStorage.setItem("user", JSON.stringify(user));
+          this.showAlert("success", "Chỉnh sửa thành công");
+          this.isEditName = true;
+          this.isWantEditName = true;
+          this.isLoadingName = false;
+        })
+        .catch(() => {
+          this.showAlert("error", "Chỉnh sửa thất bại");
+        });
+    },
+    
+    // sửa giới thiệu cty
+    updateCompanyDescribe(){
+      this.companyStorage.companyDescriber = this.company.companyDescriber;
+      this.isLoadingDescribe = true;
+      axios
+        .post("company/updatecompany", this.companyStorage)
+        .then((res) => {
+          var user = JSON.parse(sessionStorage.getItem("user"));
+          user.company = res.data.data;
+          sessionStorage.removeItem("user");
+          sessionStorage.setItem("user", JSON.stringify(user));
+          this.showAlert("success", "Chỉnh sửa thành công");
+          this.isEdit = true;
+          this.isWantEdit = true;
+          this.isLoadingDescribe = false;
+        })
+        .catch(() => {
+          this.showAlert("error", "Chỉnh sửa thất bại");
+        });
+    },
+
+    // sửa địa chỉ
+    updateCompanyLocation() {
+      this.companyStorage.address = this.company.address;
+      this.isLoadingLocation = true;
+      axios
+        .post("company/updatecompany", this.companyStorage)
+        .then((res) => {
+          var user = JSON.parse(sessionStorage.getItem("user"));
+          user.company = res.data.data;
+          sessionStorage.removeItem("user");
+          sessionStorage.setItem("user", JSON.stringify(user));
+          this.showAlert("success", "Chỉnh sửa thành công");
+          this.isEditLocation = true;
+          this.isWantEditLocation = true;
+          this.isLoadingLocation = false;
+        })
+        .catch(() => {
+          this.showAlert("error", "Chỉnh sửa thất bại");
+        });
+    },
+
     upBanner() {
       this.$refs.inputBanner.click();
     },
@@ -360,6 +463,7 @@ export default {
     cancelEdit() {
       this.isEdit = true;
       this.isWantEdit = true;
+      this.company.companyDescriber = this.companyStorage.companyDescriber;
     },
     editLocation() {
       this.isEditLocation = false;
@@ -368,6 +472,7 @@ export default {
     cancelEditLocation() {
       this.isEditLocation = true;
       this.isWantEditLocation = true;
+      this.company.address = this.companyStorage.address;
     },
     editName() {
       this.isEditName = false;
@@ -376,6 +481,7 @@ export default {
     cancelEditName() {
       this.isEditName = true;
       this.isWantEditName = true;
+      this.company.companyName = this.companyStorage.companyName;
     },
   },
 };
@@ -425,5 +531,21 @@ export default {
   display: flex;
   align-items: center;
   flex-wrap: initial;
+}
+.s-alert {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  Max-width: 250px;
+  z-index: 9999;
+  height: 36px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+   font-family: Arial, Helvetica, sans-serif;
+}
+.my-font{
+   font-family: Arial, Helvetica, sans-serif;
 }
 </style>
