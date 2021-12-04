@@ -1,5 +1,12 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import CompanyPage from '@/components/pages/CompanyPage.vue';
+import RecruitPage from '@/components/pages/RecruitPage.vue';
+import JobCarePage from '@/components/pages/JobCarePage.vue';
+import JobPage from '@/components/pages/JobPage.vue';
+import Home from '@/components/Home.vue';
+import Register from '@/components/users/Register.vue';
+import Login from '@/components/users/Login.vue';
 
 Vue.use(Router);
 
@@ -10,23 +17,23 @@ export default new Router({
         {
             path : "/register",
             name : "register",
-            component : () => import ('@/components/users/Register.vue')
+            component : Register
         },
         {
             path : "/login",
             name : "login",
-            component : () => import (/* webpackChunkName: "component-C" */'@/components/users/Login.vue')
+            component : Login
         },
         {
             path : "/home",
             name : "home",
-            component : () => import ('@/components/Home.vue'),
+            component : Home,
             redirect : '/home/job',
             children: [
                 {
                     path : "job",
                     name: "job",
-                    component : () => import ('@/components/pages/JobPage.vue'),
+                    component : JobPage,
                 },
                 {
                     path : "job/:jobID",
@@ -36,17 +43,17 @@ export default new Router({
                 {
                     path : "job-care",
                     name: "job-care",
-                    component : () => import ('@/components/pages/JobCarePage.vue'),
+                    component : JobCarePage,
                 },
                 {
                     path : "company",
                     name: "company",
-                    component : () => import ('@/components/pages/CompanyPage.vue'),
+                    component : CompanyPage,
                 },
                 {
                     path : "recruit",
                     name: "recruit",
-                    component : () => import ('@/components/pages/RecruitPage.vue'),
+                    component : RecruitPage,
                 },
 
             ]

@@ -1,19 +1,18 @@
 export default class JobItemModel {
-    JobID
+    PostId;
+    CompanyId;
     Title;
-    Owner;
-    Image;
-    Status;
+    CompanyName;
+    CompanyAvatar;
     IsFavourite;
-    Tags;
 
-    constructor(Title, Owner, Image, Status, IsFavourite, Tags, JobID) {
+    constructor(PostId, CompanyId, Title, CompanyName, CompanyAvatar, IsFavourite) {
+        this.PostId = PostId
+        this.CompanyId = CompanyId
         this.Title = Title
-        this.Owner = Owner
-        this.Image = Image
-        this.Status = Status
+        this.CompanyName = CompanyName
+        this.CompanyAvatar = CompanyAvatar
         this.IsFavourite = IsFavourite
-        this.Tags = Tags
-        this.JobID = JobID
+
     }
 }

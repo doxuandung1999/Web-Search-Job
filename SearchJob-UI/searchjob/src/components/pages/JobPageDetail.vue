@@ -1,184 +1,627 @@
 <template>
-  <div class="w-full wrap">
-    <v-container>
-      <v-row class="w-full">
-        <div class="box-white flex-m m-t-32 box-detail-job w-full">
-          <div class="logo">
-            <img
-              src="https://cdn.topcv.vn/80/company_logos/cong-ty-co-phan-propertyguru-viet-nam-5f39fa780ef62.jpg"
-              alt=""
-              srcset=""
-            />
-          </div>
-          <div class="box-info-job flex-grow-1">
-            <h1 class="job-title text-highlight bold">
-              Nhân Viên Tư Vấn - Website Thương Mại Điện Tử
-            </h1>
-            <div class="company-title">
-              <a
-                href="https://www.topcv.vn/cong-ty/cong-ty-co-phan-propertyguru-viet-nam/158.html"
-                class="text-dark-blue fs-18 bold"
-                >Công ty Cổ phần PropertyGuru Việt Nam</a
+  <v-container style="max-width: 100% !important">
+    <v-row
+      class="d-flex justify-center align-center"
+      style="background-color: #f0f0f0; padding: 20px 0 0"
+    >
+      <v-col cols="10" class="pt-0 content">
+        <v-row class="w-full">
+          <div class="box-white flex-m m-t-32 box-detail-job w-full">
+            <div class="logo">
+              <img
+                src="https://cdn.topcv.vn/80/company_logos/cong-ty-co-phan-propertyguru-viet-nam-5f39fa780ef62.jpg"
+                alt=""
+                srcset=""
+              />
+            </div>
+            <div class="box-info-job flex-grow-1 my-font">
+              <h1 class="job-title text-highlight bold">
+                {{ jobPost.Title }}
+              </h1>
+              <div class="company-title">
+                <a href="" class="text-dark-blue fs-18 bold">{{
+                  jobPost.CompanyName
+                }}</a>
+              </div>
+              <div class="job-deadline">
+                <v-icon class="fs-20">mdi-clock-outline</v-icon>
+                <span class="m-t-4 m-l-4">Hạn nộp hồ sơ: {{ expireDate }}</span>
+              </div>
+            </div>
+            <div class="btn-group">
+              <v-btn
+                block
+                large
+                outlined
+                class="ma-2 m-t-32"
+                style="height: 36px !important"
+                color="success"
+                @click="updateJobCare"
+                :hidden="jobPost.isFavourite"
               >
-            </div>
-            <div class="job-deadline">
-              <v-icon class="fs-20">mdi-clock-outline</v-icon>
-              <span class="m-t-4 m-l-4">Hạn nộp hồ sơ: 17/12/2021</span>
+                <v-icon left dark class="m-r-16"> mdi-heart-outline </v-icon>
+                <span style="font-weight: 500; text-transform: none"
+                  >Lưu tin</span
+                >
+              </v-btn>
+
+              <div
+                @click="updateJobCare"
+                style="cursor: pointer"
+                :class="{ disable: !jobPost.isFavourite }"
+              >
+                <v-icon class="icon" size="40px" color="#4caf50">
+                  mdi-heart</v-icon
+                >
+              </div>
             </div>
           </div>
-          <div class="btn-group h-full">
-            <v-btn block large class="ma-2" color="success">
-              <v-icon left dark class="m-r-16"> mdi-send </v-icon>
-              <span style="font-weight: 500">Ứng tuyển ngay</span>
-            </v-btn>
-            <v-btn block large outlined class="ma-2 m-t-32" color="success">
-              <v-icon left dark class="m-r-16"> mdi-heart-outline </v-icon>
-              <span style="font-weight: 500">Lưu tin</span>
-            </v-btn>
+        </v-row>
+        <v-row class="w-full">
+          <div class="box-white flex-t m-t-32 box-detail-job w-full">
+            <v-col style="padding: 0 !important" cols="8">
+              <h1 class="box-title">Chi tiết tin tuyển dụng</h1>
+              <div class="box-info my-font">
+                <p>Thông tin chung</p>
+                <div class="box-main">
+                  <!-- lương -->
+                  <div class="box-item flex-m m-t-16">
+                    <img
+                      src="https://www.topcv.vn/v4/image/job-detail/icon/1.svg"
+                      alt=""
+                    />
+                    <div class="m-l-16">
+                      <strong>Mức lương </strong> <br />
+                      <span>
+                        {{ jobPost.Salary }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- số lượng tuyển -->
+                  <div class="box-item flex-m m-t-16">
+                    <img
+                      src="https://www.topcv.vn/v4/image/job-detail/icon/5.svg"
+                      alt=""
+                    />
+                    <div class="m-l-16">
+                      <strong>Số lượng tuyển </strong> <br />
+                      <span>
+                        {{ jobPost.Quantity }}
+                      </span>
+                      <span> Người </span>
+                    </div>
+                  </div>
+                  <!-- hình thức làm việc -->
+                  <div class="box-item flex-m m-t-16">
+                    <img
+                      src="https://www.topcv.vn/v4/image/job-detail/icon/2.svg"
+                      alt=""
+                    />
+                    <div class="m-l-16">
+                      <strong>Hình thức làm việc</strong> <br />
+                      <span>
+                        {{ jobPost.TypeJob }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- yêu cầu giới tính -->
+                  <div class="box-item flex-m m-t-16">
+                    <img
+                      src="https://www.topcv.vn/v4/image/job-detail/icon/3.svg"
+                      alt=""
+                    />
+                    <div class="m-l-16">
+                      <strong>Giới tính</strong> <br />
+                      <span>
+                        {{ jobPost.RequestSex }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- kinh nghiệm -->
+                  <div class="box-item flex-m m-t-16">
+                    <img
+                      src="https://www.topcv.vn/v4/image/job-detail/icon/4.svg"
+                      alt=""
+                    />
+                    <div class="m-l-16">
+                      <strong>Kinh nghiệm</strong> <br />
+                      <span>
+                        {{ jobPost.Experience }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="box-address">
+                <p>Địa điểm làm việc</p>
+                <div>
+                  {{ jobPost.JobAddress }}
+                </div>
+              </div>
+
+              <!-- mô tả công việc -->
+              <div class="box-how-to-apply">
+                <div class="title-detail">Mô tả công việc</div>
+                <div></div>
+              </div>
+              <!-- yêu cầu ứng viêb -->
+              <div class="box-how-to-apply">
+                <div class="title-detail">Yêu cầu ứng viên</div>
+                <div></div>
+              </div>
+              <div class="box-how-to-apply">
+                <div class="title-detail">Quyền lợi</div>
+                <div></div>
+              </div>
+
+              <div class="box-how-to-apply">
+                <div class="title-detail">Cách thức ứng tuyển</div>
+                <div></div>
+              </div>
+            </v-col>
+            <v-col cols="4">
+              <div class="box-share-job">
+                <div style="font-size: 16px; font-weight: bold">
+                  Chia sẻ tin tuyển dụng
+                </div>
+                <p style="margin-bottom: 10px; margin-top: 16px">
+                  Sao chép đường dẫn
+                </p>
+                <div class="box-copy">
+                  <div class="url-copy">
+                    https://www.topcv.vn/viec-lam/nhan-vien-tu-van-website-thuong-mai-dien-tu/515383.html
+                  </div>
+                  <div class="btn-copy flex-c-m hov-pointer">
+                    <v-icon color="#00b14f">mdi-animation</v-icon>
+                  </div>
+                </div>
+              </div>
+            </v-col>
           </div>
-        </div>
-      </v-row>
-      <v-row class="w-full">
-        <div class="box-white flex-t m-t-32 box-detail-job w-full">
-          <v-col style="padding: 0 !important" cols="8">
-            <h1 class="box-title">Chi tiết tin tuyển dụng</h1>
-            <div class="box-info">
-              <p>Thông tin chung</p>
-              <div class="box-main">
-                <div class="box-item flex-m m-t-16">
-                  <img
-                    src="https://www.topcv.vn/v4/image/job-detail/icon/1.svg"
-                    alt=""
-                  />
-                  <div class="m-l-16">
-                    <strong>Mức lương </strong> <br />
-                    <span>
-                      <a class="text-highlight"> Đăng nhập để xem mức lương</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="box-item flex-m m-t-16">
-                  <img
-                    src="https://www.topcv.vn/v4/image/job-detail/icon/1.svg"
-                    alt=""
-                  />
-                  <div class="m-l-16">
-                    <strong>Mức lương </strong> <br />
-                    <span>
-                      <a class="text-highlight"> Đăng nhập để xem mức lương</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="box-item flex-m m-t-16">
-                  <img
-                    src="https://www.topcv.vn/v4/image/job-detail/icon/2.svg"
-                    alt=""
-                  />
-                  <div class="m-l-16">
-                    <strong>Mức lương </strong> <br />
-                    <span>
-                      <a class="text-highlight"> Đăng nhập để xem mức lương</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="box-item flex-m m-t-16">
-                  <img
-                    src="https://www.topcv.vn/v4/image/job-detail/icon/3.svg"
-                    alt=""
-                  />
-                  <div class="m-l-16">
-                    <strong>Mức lương </strong> <br />
-                    <span>
-                      <a class="text-highlight"> Đăng nhập để xem mức lương</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="box-item flex-m m-t-16">
-                  <img
-                    src="https://www.topcv.vn/v4/image/job-detail/icon/4.svg"
-                    alt=""
-                  />
-                  <div class="m-l-16">
-                    <strong>Mức lương </strong> <br />
-                    <span>
-                      <a class="text-highlight"> Đăng nhập để xem mức lương</a>
-                    </span>
-                  </div>
-                </div>
-                <div class="box-item flex-m m-t-16">
-                  <img
-                    src="https://www.topcv.vn/v4/image/job-detail/icon/5.svg"
-                    alt=""
-                  />
-                  <div class="m-l-16">
-                    <strong>Mức lương </strong> <br />
-                    <span>
-                      <a class="text-highlight"> Đăng nhập để xem mức lương</a>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="box-address">
-              <p>Địa điểm làm việc</p>
-              <div>
-                <div class="text-dark-gray">
-                  - Khu vực: Hà Nội, Hồ Chí Minh, Bình Dương, Đồng Nai, Đà Nẵng,
-                  Bà Rịa-Vũng Tàu, TP Nha Trang, Hải Phòng
-                </div>
-                <div class="text-dark-gray" style="margin-bottom: 10px">
-                  - Tầng 31, Keangnam Hanoi Landmark, Phạm Hùng, Nam Từ Liêm, Hà
-                  Nội, các tỉnh thành trên cả nước
-                </div>
-              </div>
-            </div>
-
-            <div class="content">Content here</div>
-
-            <div class="box-how-to-apply">
-              <h2>Cách thức ứng tuyển</h2>
-              <p class="m-t-8">
-                Ứng viên nộp hồ sơ trực tuyến bằng cách bấm
-                <strong class="text-highlight">Ứng tuyển ngay</strong> dưới đây.
-              </p>
-              <div class="flex-m">
-                <v-btn large class="" color="success">
-                  <span style="font-weight: 500">Ứng tuyển ngay</span>
-                </v-btn>
-                <v-btn large outlined class="m-l-8" color="success">
-                  <span style="font-weight: 500">Lưu tin</span>
-                </v-btn>
-              </div>
-            </div>
-          </v-col>
-          <v-col cols="4">
-            <div class="box-share-job">
-              <h1>Chia sẻ tin tuyển dụng</h1>
-              <p>Sao chép đường dẫn</p>
-              <div class="box-copy">
-                <div class="url-copy">
-                  https://www.topcv.vn/viec-lam/nhan-vien-tu-van-website-thuong-mai-dien-tu/515383.html
-                </div>
-                <div class="btn-copy flex-c-m hov-pointer">
-                  <v-icon color="#00b14f">mdi-animation</v-icon>
-                </div>
-              </div>
-              
-            </div>
-          </v-col>
-        </div>
-      </v-row>
-    </v-container>
-  </div>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 export default {
   name: "JobPageDetail",
+  data: () => ({
+    jobPost: {
+      UserId: null,
+      CompanyId: null,
+      Status: null,
+      Title: null,
+      ExpireDate: null,
+      Salary: null,
+      Quantity: null,
+      TypeJob: null,
+      RequestSex: null,
+      Experience: null,
+      JobAddress: null,
+      JobDescribe: null,
+      Request: null,
+      Benefit: null,
+      MethodApply: null,
+      Career: null,
+      Location: null,
+      CompanyName: null,
+      isFavourite: false,
+    },
+    expireDate: null,
+    careers: [
+      {
+        name: "Tất cả ngành nghề",
+        value: 0,
+      },
+      {
+        name: "Kinh doanh / Bán hàng",
+        value: 1,
+      },
+      {
+        name: "Biên / Phiên dịch",
+        value: 2,
+      },
+      {
+        name: "Bưu chính - Viễn thông",
+        value: 3,
+      },
+      {
+        name: "Bảo hiểm",
+        value: 4,
+      },
+      {
+        name: "Bất động sản",
+        value: 5,
+      },
+      {
+        name: "Chứng khoán / Vàng / Ngoại tệ",
+        value: 6,
+      },
+      {
+        name: "Công nghệ cao",
+        value: 7,
+      },
+      {
+        name: "Cơ khí / Chế tạo / Tự động hóa",
+        value: 8,
+      },
+      {
+        name: "Du lịch",
+        value: 9,
+      },
+      {
+        name: "Dầu khí / hóa chất",
+        value: 10,
+      },
+      {
+        name: "Dệt may / Da giầy",
+        value: 11,
+      },
+      {
+        name: "Dịch vụ khách hàng",
+        value: 12,
+      },
+      {
+        name: "Điện tử viễn thông",
+        value: 13,
+      },
+      {
+        name: "Điện / Điện tử / Điện lạnh",
+        value: 14,
+      },
+      {
+        name: "Giáo dục / Đào tạo",
+        value: 15,
+      },
+      {
+        name: "Hóa học / Sinh học",
+        value: 16,
+      },
+      {
+        name: "Hoạch định / Dự án",
+        value: 17,
+      },
+      {
+        name: "Hàng gia dụng",
+        value: 18,
+      },
+      {
+        name: "Hàng hải",
+        value: 19,
+      },
+      {
+        name: "Hàng không",
+        value: 20,
+      },
+      {
+        name: "Hành chính / văn phòng",
+        value: 21,
+      },
+      {
+        name: "IT Phần cứng / Mạng",
+        value: 22,
+      },
+      {
+        name: "IT Phần mềm",
+        value: 23,
+      },
+      {
+        name: "Khách sạn / Nhà hàng",
+        value: 24,
+      },
+      {
+        name: "Kế toán / kiểm toán",
+        value: 25,
+      },
+      {
+        name: "Marketing / Tuyển thông / Quảng cáo",
+        value: 26,
+      },
+    ],
+    locations: [
+      {
+        name: "Tất cả địa điểm",
+        value: 0,
+      },
+      {
+        name: "An Giang",
+        value: 1,
+      },
+      {
+        name: "Bà Rịa – Vũng Tàu",
+        value: 2,
+      },
+      {
+        name: "Bạc Liêu",
+        value: 3,
+      },
+      {
+        name: "Bắc Giang",
+        value: 4,
+      },
+      {
+        name: "Bắc Kạn",
+        value: 5,
+      },
+      {
+        name: "Bắc Ninh",
+        value: 6,
+      },
+      {
+        name: "Bến Tre",
+        value: 7,
+      },
+      {
+        name: "Bình Dương",
+        value: 8,
+      },
+      {
+        name: "Bình Định",
+        value: 9,
+      },
+      {
+        name: "Bình Phước",
+        value: 10,
+      },
+      {
+        name: "Bình Thuận",
+        value: 11,
+      },
+      {
+        name: "Cà Mau",
+        value: 12,
+      },
+      {
+        name: "Cao Bằng",
+        value: 13,
+      },
+      {
+        name: "Cần Thơ",
+        value: 14,
+      },
+      {
+        name: "Đà Nẵng",
+        value: 15,
+      },
+      {
+        name: "Đắk Lắk",
+        value: 16,
+      },
+      {
+        name: "Đắk Nông",
+        value: 17,
+      },
+      {
+        name: "Điện Biên",
+        value: 18,
+      },
+      {
+        name: "Đồng Nai",
+        value: 19,
+      },
+      {
+        name: "Đồng Tháp",
+        value: 20,
+      },
+      {
+        name: "Gia Lai",
+        value: 21,
+      },
+      {
+        name: "Hà Giang",
+        value: 22,
+      },
+      {
+        name: "Hà Nam",
+        value: 23,
+      },
+      {
+        name: "Hà Nội",
+        value: 24,
+      },
+      {
+        name: "Hà Tĩnh",
+        value: 25,
+      },
+      {
+        name: "Hải Dương",
+        value: 26,
+      },
+      {
+        name: "Hải Phòng",
+        value: 27,
+      },
+      {
+        name: "Hậu Giang",
+        value: 28,
+      },
+      {
+        name: "Hòa Bình",
+        value: 29,
+      },
+      {
+        name: "Thành phố Hồ Chí Minh",
+        value: 30,
+      },
+      {
+        name: "Hưng Yên",
+        value: 31,
+      },
+      {
+        name: "Khánh Hòa",
+        value: 32,
+      },
+      {
+        name: "Kiên Giang",
+        value: 33,
+      },
+      {
+        name: "Kon Tum",
+        value: 34,
+      },
+      {
+        name: "Lai Châu",
+        value: 35,
+      },
+      {
+        name: "Lạng Sơn",
+        value: 36,
+      },
+      {
+        name: "Lào Cai",
+        value: 37,
+      },
+      {
+        name: "Lâm Đồng",
+        value: 38,
+      },
+      {
+        name: "Long An",
+        value: 39,
+      },
+      {
+        name: "Nam Định",
+        value: 40,
+      },
+      {
+        name: "Nghệ An",
+        value: 41,
+      },
+      {
+        name: "Ninh Bình",
+        value: 42,
+      },
+      {
+        name: "Ninh Thuận",
+        value: 43,
+      },
+      {
+        name: "Phú Thọ",
+        value: 44,
+      },
+      {
+        name: "Phú Yên",
+        value: 45,
+      },
+      {
+        name: "Quảng Bình",
+        value: 46,
+      },
+      {
+        name: "Quảng Nam",
+        value: 47,
+      },
+      {
+        name: "Quảng Ngãi",
+        value: 48,
+      },
+      {
+        name: "Quảng Ninh",
+        value: 49,
+      },
+      {
+        name: "Quảng Trị",
+        value: 50,
+      },
+      {
+        name: "Sóc Trăng",
+        value: 51,
+      },
+      {
+        name: "Sơn La",
+        value: 52,
+      },
+      {
+        name: "Tây Ninh",
+        value: 53,
+      },
+      {
+        name: "Thái Bình",
+        value: 54,
+      },
+      {
+        name: "Thái Nguyên",
+        value: 55,
+      },
+      {
+        name: "Thanh Hóa",
+        value: 56,
+      },
+      {
+        name: "Thừa Thiên Huế",
+        value: 57,
+      },
+      {
+        name: "Tiền Giang",
+        value: 58,
+      },
+      {
+        name: "Trà Vinh",
+        value: 59,
+      },
+      {
+        name: "Tuyên Quang",
+        value: 60,
+      },
+      {
+        name: "Vĩnh Long",
+        value: 61,
+      },
+      {
+        name: "Vĩnh Phúc",
+        value: 62,
+      },
+      {
+        name: "Yên Bái",
+        value: 63,
+      },
+    ],
+    typeJobs: [
+      {
+        name: "Toàn thời gian",
+        value: 0,
+      },
+      {
+        name: "Bán thời gian",
+        value: 1,
+      },
+    ],
+    sexs: [
+      {
+        name: "Không yêu cầu",
+        value: 0,
+      },
+      {
+        name: "Nam",
+        value: 1,
+      },
+      {
+        name: "Nữ",
+        value: 2,
+      },
+    ],
+  }),
+  methods: {
+    updateJobCare() {
+      this.jobPost.isFavourite = !this.jobPost.isFavourite;
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+.disable {
+  display: none;
+}
+.my-font {
+  font-family: Arial, Helvetica, sans-serif;
+}
+.title-detail {
+  font-size: 16px;
+  font-weight: bold;
+}
 a {
   text-decoration: none;
   color: black;
@@ -268,6 +711,7 @@ a {
     }
   }
   .box-how-to-apply {
+    margin-top: 24px;
     h2 {
       font-size: 18px;
       color: #000;
@@ -278,6 +722,7 @@ a {
     border: 1px solid #eee;
     padding: 16px;
     margin-bottom: 24px;
+    margin-top: 36px;
     .box-copy {
       display: flex;
       justify-content: space-between;
