@@ -17,7 +17,8 @@
         active-class="bg-active"
         v-for="menu in menus"
         :key="menu.title"
-        :to="menu.route"
+        
+        @click="routeToPage(menu.route)"
         replace
         link
       >
@@ -89,6 +90,9 @@ export default {
   methods: {
     routeLogin() {
       this.$router.push({ name: "login" });
+    },
+    routeToPage(route) {
+      this.$router.push({ name: route });
     },
     routeRegister() {
       this.$router.push({ name: "register" });
