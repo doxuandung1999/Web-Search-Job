@@ -1,26 +1,120 @@
 <template>
   <div class="w-full">
+    <v-dialog v-model="dialog" persistent max-width="290">
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn style="display:none" color="primary" dark v-bind="attrs" v-on="on" ref="showConfirm"> </v-btn>
+      </template>
+      <v-card>
+        <v-card-title class="text-h5 my-font">
+          Thông báo
+        </v-card-title>
+        <v-card-text style="font-size : 14px" class="my-font"
+          >Bạn có chắc chắn xóa bài đăng</v-card-text
+        >
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn class="my-font" style="font-weight:bold" color="red darken-1" :loading="loadingDelete" text @click="deletePost(data)">
+            Đồng ý
+          </v-btn>
+          <v-btn class="my-font" style="font-weight:bold" color="green darken-1" text @click="dialog = false">
+            Không
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-card class="hov-pointer pos-relative">
       <div class="flex-m wrap h-item">
         <div class="image">
           <img v-bind:src="data.CompanyAvatar" alt="" />
         </div>
-        <div style="width: calc(100% - 100px); padding-left: 12px">
+        <div
+          style="padding-left: 12px"
+          :class="[!isAdmin && !isManage ? 'w-item' : 'w-item-company']"
+        >
           <v-card-title style="padding: 0; display: flex" class="flex-m">
-            <div  @click="navigateDetail(data)" :title="data.Title" class="title w-full my-font" style="font-size:14px !important;font-weight:bold">
+            <div
+              @click="navigateDetail(data)"
+              :title="data.Title"
+              class="title w-full my-font"
+              style="font-size: 14px !important; font-weight: bold"
+            >
               {{ data.Title }}
             </div>
             <div
               class="pos-absolute"
               style="top: 8px; right: 12px"
               @click="toggleFavourite"
+              :class="{ disable: isAdmin }"
+              v-show="!isManage"
             >
               <v-icon class="icon" small color="#4caf50">{{
                 data.IsFavourite ? "mdi-heart" : "mdi-heart-outline"
               }}</v-icon>
             </div>
+            <div
+              :class="{ disable: !isAdmin }"
+              class="pos-absolute"
+              style="top: 28px; right: 12px; display: flex"
+            >
+              <div
+                v-show="data.Status == 0"
+                style="color: #4caf50; font-size: 14px; padding-right: 14px"
+              >
+                Đã duyệt
+              </div>
+              <div
+                v-show="data.Status == 1"
+                style="color: red; font-size: 14px; padding-right: 14px"
+              >
+                Chưa duyệt
+              </div>
+              <v-btn
+                outlined
+                color="success"
+                style="margin-right: 14px"
+                class="font-family-app text-none"
+                small
+                @click="editPost(data)"
+                >Sửa</v-btn
+              >
+              <v-btn
+                color="error"
+                class="font-family-app text-none"
+                small
+                @click="confimDelete"
+                >Xóa</v-btn
+              >
+            </div>
+            <div
+              class="pos-absolute"
+              style="top: 28px; right: 12px; display: flex"
+              v-show="isManage"
+            >
+              <v-btn
+                outlined
+                color="success"
+                class="font-family-app text-none"
+                style="margin-right: 14px"
+                small
+                @click="acceptPost(data)"
+                :loading="loadingAccept"
+                >Duyệt</v-btn
+              >
+              <v-btn
+                color="error"
+                class="font-family-app text-none"
+                small
+                @click="confimDelete"
+                >Xóa</v-btn
+              >
+            </div>
           </v-card-title>
-          <v-card-subtitle :title="data.CompanyName" class="sub-title my-font" style="padding: 12px 0 0 0; font-size:12px">
+          <v-card-subtitle
+            @click="navigateCompany(data)"
+            :title="data.CompanyName"
+            class="sub-title my-font"
+            style="padding: 12px 0 0 0; font-size: 12px"
+          >
             {{ data.CompanyName }}</v-card-subtitle
           >
         </div>
@@ -34,10 +128,25 @@ import JobItemModel from "@/models/job-item.js";
 import axios from "axios";
 export default {
   name: "JobItem",
+  data() {
+    return {
+      loadingAccept: false,
+      dialog: false,
+      loadingDelete : false
+    };
+  },
   props: {
     data: {
       type: JobItemModel,
       default: null,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isManage: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {},
@@ -47,21 +156,68 @@ export default {
       this.data.IsFavourite = !this.data.IsFavourite;
       var user = JSON.parse(sessionStorage.getItem("user"));
       var param = {
-        UserId : user.id,
-        PostId : this.data.PostId
-      }
+        UserId: user.id,
+        PostId: this.data.PostId,
+      };
       axios
         .post("JobCare/updatejobcare", param)
         .then(() => {
-          this.$emit('emit-alert', "success" , "Thành công");
+          this.$emit("emit-alert", "success", "Thành công");
         })
         .catch(() => {
           // this.showAlert("error", "thêm công việc quan tâm thất bại");
-          this.$emit('emit-alert', "error" , "Thất bại");
+          this.$emit("emit-alert", "error", "Thất bại");
         });
     },
     navigateDetail(data) {
       this.$router.push({ name: "job-detail", params: { jobID: data.PostId } });
+    },
+    navigateCompany(data) {
+      this.$router.push({
+        name: "company-detail",
+        params: { companyID: data.CompanyId },
+      });
+    },
+    editPost(data) {
+      this.$router.push({
+        name: "recruit-edit",
+        params: { PostID: data.PostId },
+      });
+    },
+    acceptPost(data) {
+      this.loadingAccept = true;
+      axios
+        .post("Post/updatestatus?postID=" + data.PostId)
+        .then(() => {
+          this.loadingAccept = false;
+          this.$emit("emit-alert", "success", "Thành công");
+          location.reload();
+          this.$emit("load-page");
+        })
+        .catch(() => {
+          this.loadingAccept = false;
+          // this.showAlert("error", "thêm công việc quan tâm thất bại");
+          this.$emit("emit-alert", "error", "Thất bại");
+        });
+    },
+    confimDelete(){
+      this.dialog = true;
+    },
+    deletePost(data) {
+      axios
+        .post("Post/deletepost?postID=" + data.PostId)
+        .then(() => {
+          this.loadingDelete = false;
+          this.dialog = false;
+          this.$emit("emit-alert", "success", "Xóa bài đăng thành công");
+          location.reload();
+        })
+        .catch(() => {
+          this.loadingDelete = false;
+          // this.showAlert("error", "thêm công việc quan tâm thất bại");
+          this.$emit("emit-alert", "error", "Thất bại");
+        });
+      
     },
   },
   mounted() {
@@ -71,10 +227,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.h-item{
+.h-item {
   height: 86px;
   margin: 0 0 8px 0;
-  transition: box-shadow .2s;
+  transition: box-shadow 0.2s;
   box-shadow: 2px 2px 12px rgb(33 47 63 / 10%);
 }
 
@@ -124,10 +280,19 @@ img {
     color: green;
   }
 }
-.my-font{
-   font-family: Arial, Helvetica, sans-serif;
+.my-font {
+  font-family: Arial, Helvetica, sans-serif;
 }
 .v-sheet.v-card:not(.v-sheet--outlined) {
   box-shadow: none;
+}
+.disable {
+  display: none !important;
+}
+.w-item {
+  width: calc(100% - 100px);
+}
+.w-item-company {
+  width: calc(100% - 250px);
 }
 </style>

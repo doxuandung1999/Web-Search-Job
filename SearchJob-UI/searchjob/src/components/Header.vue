@@ -82,6 +82,7 @@ export default {
       { title: "Việc làm quan tâm", route: "job-care" },
       { title: "Công ty", route: "company" },
       { title: "Đăng tuyển", route: "recruit" },
+      { title: "Quản lý bài đăng", route: "manage"},
     ],
     items: [{ title: "Đăng xuất" }],
     userName: "",
@@ -109,12 +110,18 @@ export default {
       var user = JSON.parse(sessionStorage.getItem("user"));
       this.isUser = true;
       this.userName = user.name;
-      // if (user.role == 0) {
-      //   this.menus = [
-      //     { title: "Việc làm", route: "job" },
-      //     { title: "Việc làm quan tâm", route: "job-care" },
-      //   ];
-      // }
+      if (user.role == 0) {
+        this.menus = [
+          { title: "Việc làm", route: "job" },
+          { title: "Việc làm quan tâm", route: "job-care" },
+        ];
+      }
+      if (user.role == 2) { // admin
+        this.menus = [
+          { title: "Việc làm", route: "job" },
+          { title: "Quản lý bài đăng", route: "manage"},
+        ];
+      }
     }
   },
 };

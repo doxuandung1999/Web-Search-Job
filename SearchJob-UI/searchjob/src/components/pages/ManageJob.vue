@@ -11,12 +11,10 @@
         <v-col>
           <div class="fs-18 bold flex-m">
             <v-icon class="m-r-4" color="green darken-2">mdi-star</v-icon
-            ><span style="line-height: 60px"
-              >TIN TUYỂN DỤNG QUAN TÂM</span
-            >
+            ><span style="line-height: 60px">Quản lý bài đăng</span>
           </div>
         </v-col>
-         <div v-show="!isData">
+        <div v-show="!isData">
           <div style="display: flex">
             <div class="loading-content">
               <VueSkeletonLoader
@@ -73,6 +71,9 @@
             rounded
           />
         </div>
+        <div style="padding-bottom: 30px" v-show="!haveData && isData">
+          <i>Không có bài đăng cần duyệt</i>
+        </div>
 
         <v-carousel
           v-model="model"
@@ -81,22 +82,25 @@
           hide-delimiter-background
           progress-color="#4caf50"
           style="background-color: #fff:padding:20px;"
+          v-if="haveData && isData"
         >
           <v-carousel-item v-for="(page, i) in listPage" :key="i">
             <v-row class="d-flex align-center p-b-52 p-t-8 p-l-8 p-r-8 p-t-16">
               <v-col
                 v-for="jobItem in page"
                 :key="jobItem.PostId"
-                lg="4"
-                md="4"
-                sm="4"
+                lg="12"
+                md="12"
+                sm="12"
                 xs="16"
                 class="pt-0 content"
               >
                 <job-item
                   :data="jobItem"
                   @emit-alert="showAlert"
+                  @load-page="initData"
                   :isAdmin="false"
+                  :isManage="true"
                 ></job-item>
               </v-col>
             </v-row>
@@ -111,10 +115,12 @@
 import JobItem from "../shared/JobItem.vue";
 import JobItemModel from "@/models/job-item.js";
 import axios from "axios";
+import VueSkeletonLoader from "skeleton-loader-vue";
 export default {
-  name: "job-care",
+  name: "jobpage",
   components: {
     JobItem,
+    VueSkeletonLoader,
   },
   data() {
     return {
@@ -127,31 +133,33 @@ export default {
       typeAlert: "success",
       isShowAddler: false,
       messageAlert: "",
-      isData: false,
+      haveData: false,
+      isData : false,
     };
   },
   methods: {
     initData() {
+      this.listPage = [];
       var user = JSON.parse(sessionStorage.getItem("user"));
       if (user) {
         axios
-          .get("Post/getpostbyuserid?userID=" + user.id)
+          .get("Post/getpostnotacept")
           .then((res) => {
             res.data.result.forEach((element) => {
-              if (element.status == 0 && element.isFavourite) {
-                var objItem = new JobItemModel(
-                  element.postId,
-                  element.companyId,
-                  element.title,
-                  element.companyName,
-                  element.companyAvatar,
-                  element.isFavourite
-                );
-                this.listJobItem.push(objItem);
-              }
+              var objItem = new JobItemModel(
+                element.postId,
+                element.companyId,
+                element.title,
+                element.companyName,
+                element.companyAvatar,
+                element.isFavourite
+              );
+              this.listJobItem.push(objItem);
+              this.haveData = true;
+              
             });
             for (let i = 0; i < this.listJobItem.length; i++) {
-              if (i < 12) {
+              if (i < 3) {
                 this.listItemInPageOne.push(this.listJobItem[i]);
               } else {
                 this.listItemInPageTwo.push(this.listJobItem[i]);
@@ -162,7 +170,7 @@ export default {
             this.isData = true;
           })
           .catch(() => {});
-      } 
+      }
 
       // setTimeout(this.isShowAddler = false, 3000);
     },

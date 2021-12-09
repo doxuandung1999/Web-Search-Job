@@ -4,23 +4,26 @@
       class="d-flex justify-center align-center"
       style="background-color: #f0f0f0; padding: 20px 0 0"
     >
+     <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
+        messageAlert
+      }}</v-alert>
       <v-col cols="10" class="pt-0 content">
         <v-row class="w-full">
           <div class="box-white flex-m m-t-32 box-detail-job w-full">
             <div class="logo">
               <img
-                src="https://cdn.topcv.vn/80/company_logos/cong-ty-co-phan-propertyguru-viet-nam-5f39fa780ef62.jpg"
+                :src="avatar"
                 alt=""
                 srcset=""
               />
             </div>
             <div class="box-info-job flex-grow-1 my-font">
               <h1 class="job-title text-highlight bold">
-                {{ jobPost.Title }}
+                {{ jobPost.title }}
               </h1>
-              <div class="company-title">
+              <div class="company-title" @click="navigateCompany()">
                 <a href="" class="text-dark-blue fs-18 bold">{{
-                  jobPost.CompanyName
+                  jobPost.companyName
                 }}</a>
               </div>
               <div class="job-deadline">
@@ -73,7 +76,7 @@
                     <div class="m-l-16">
                       <strong>Mức lương </strong> <br />
                       <span>
-                        {{ jobPost.Salary }}
+                        {{ jobPost.salary }}
                       </span>
                     </div>
                   </div>
@@ -86,7 +89,7 @@
                     <div class="m-l-16">
                       <strong>Số lượng tuyển </strong> <br />
                       <span>
-                        {{ jobPost.Quantity }}
+                        {{ jobPost.quantity }}
                       </span>
                       <span> Người </span>
                     </div>
@@ -100,7 +103,7 @@
                     <div class="m-l-16">
                       <strong>Hình thức làm việc</strong> <br />
                       <span>
-                        {{ jobPost.TypeJob }}
+                        {{ typeJob }}
                       </span>
                     </div>
                   </div>
@@ -113,7 +116,7 @@
                     <div class="m-l-16">
                       <strong>Giới tính</strong> <br />
                       <span>
-                        {{ jobPost.RequestSex }}
+                        {{ sex }}
                       </span>
                     </div>
                   </div>
@@ -126,7 +129,7 @@
                     <div class="m-l-16">
                       <strong>Kinh nghiệm</strong> <br />
                       <span>
-                        {{ jobPost.Experience }}
+                        {{ jobPost.experience }}
                       </span>
                     </div>
                   </div>
@@ -135,28 +138,28 @@
               <div class="box-address">
                 <p>Địa điểm làm việc</p>
                 <div>
-                  {{ jobPost.JobAddress }}
+                  {{ jobPost.jobAddress }}
                 </div>
               </div>
 
               <!-- mô tả công việc -->
               <div class="box-how-to-apply">
                 <div class="title-detail">Mô tả công việc</div>
-                <div></div>
+                <div v-html="jobPost.jobDescribe"></div>
               </div>
               <!-- yêu cầu ứng viêb -->
               <div class="box-how-to-apply">
                 <div class="title-detail">Yêu cầu ứng viên</div>
-                <div></div>
+                <div v-html="jobPost.request"></div>
               </div>
               <div class="box-how-to-apply">
                 <div class="title-detail">Quyền lợi</div>
-                <div></div>
+                <div v-html="jobPost.benefit"></div>
               </div>
 
               <div class="box-how-to-apply">
                 <div class="title-detail">Cách thức ứng tuyển</div>
-                <div></div>
+                <div v-html="jobPost.methodApply"></div>
               </div>
             </v-col>
             <v-col cols="4">
@@ -185,31 +188,15 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "JobPageDetail",
   data: () => ({
-    jobPost: {
-      UserId: null,
-      CompanyId: null,
-      Status: null,
-      Title: null,
-      ExpireDate: null,
-      Salary: null,
-      Quantity: null,
-      TypeJob: null,
-      RequestSex: null,
-      Experience: null,
-      JobAddress: null,
-      JobDescribe: null,
-      Request: null,
-      Benefit: null,
-      MethodApply: null,
-      Career: null,
-      Location: null,
-      CompanyName: null,
-      isFavourite: false,
-    },
+    jobPost: {},
     expireDate: null,
+    avatar: require("../../assets/default_company_logo.png"),
+    typeJob : "",
+    sex: "",
     careers: [
       {
         name: "Tất cả ngành nghề",
@@ -602,10 +589,77 @@ export default {
         value: 2,
       },
     ],
+    typeAlert: "success",
+    isShowAddler: false,
+    messageAlert: "",
   }),
+  created(){
+    this.initData();
+  },
   methods: {
+    initData(){
+      var user = JSON.parse(sessionStorage.getItem("user"));
+      if (user) {
+        axios
+          .get("Post/getpost?postID=" + this.$route.params.jobID + "&userID=" + user.id)
+          .then((res) => {
+            this.jobPost = res.data.result;
+            if(this.jobPost.companyAvatar != null){
+              this.avatar = this.jobPost.companyAvatar;
+              this.expireDate = this.formatDate(this.jobPost.expireDate);
+              this.typeJob = this.typeJobs.filter(x => x.value == this.jobPost.typeJob)[0].name;
+              this.sex = this.sexs.filter(x => x.value == this.jobPost.requestSex)[0].name;
+            }
+          })
+          .catch(() => {});
+      } else {
+        console.log("b");
+      }
+    },
+    // show thông báo
+    showAlert(typeAlert, messageAlert) {
+      this.typeAlert = typeAlert;
+      this.messageAlert = messageAlert;
+      this.isShowAddler = true;
+      setTimeout(() => {
+        this.isShowAddler = false;
+      }, 3000);
+      // setTimeout(this.isShowAddler = false, 3000);
+    },
     updateJobCare() {
       this.jobPost.isFavourite = !this.jobPost.isFavourite;
+      var user = JSON.parse(sessionStorage.getItem("user"));
+      var param = {
+        UserId : user.id,
+        PostId : this.jobPost.postId
+      }
+      axios
+        .post("JobCare/updatejobcare", param)
+        .then(() => {
+          this.showAlert(
+          "success",
+          "Thành công"
+        );
+        })
+        .catch(() => {
+          this.showAlert(
+          "error",
+          "Thất bại"
+        );
+        this.jobPost.isFavourite = !this.jobPost.isFavourite;
+        });
+    },
+    navigateCompany() {
+      this.$router.push({
+        name: "company-detail",
+        params: { companyID: this.$route.params.jobID  },
+      });
+    },
+    formatDate(date) {
+      if (!date) return null;
+      const dateobj = date.split("T");
+      const [year, month, day] = dateobj[0].split("-");
+      return `${day}/${month}/${year}`;
     },
   },
 };
@@ -749,5 +803,18 @@ a {
 }
 .text-highlight {
   color: #00b14f;
+}
+.s-alert {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  max-width: 600px;
+  z-index: 9999;
+  font-family: Arial, Helvetica, sans-serif;
+  height: 36px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

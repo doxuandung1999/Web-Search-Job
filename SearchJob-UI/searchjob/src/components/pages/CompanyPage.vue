@@ -129,7 +129,7 @@
                 color="#4caf50"
                 class="pl-2 my-font"
                 v-model="company.companyName"
-                style="font-size: 18px;"
+                style="font-size: 18px"
                 hide-details="true"
               ></v-text-field>
             </div>
@@ -179,9 +179,10 @@
                   >
                 </div>
               </div>
-              <div :class="{ disable: !isEdit }" v-html="company.companyDescriber">
-                
-              </div>
+              <div
+                :class="{ disable: !isEdit }"
+                v-html="company.companyDescriber"
+              ></div>
               <div :class="{ disable: isEdit }">
                 <editor
                   v-model="company.companyDescriber"
@@ -247,7 +248,7 @@
                 :class="{ disable: isEditLocation }"
                 color="#4caf50"
                 class="pl-2 my-font"
-                style="font-size: 14px;"
+                style="font-size: 14px"
                 v-model="company.address"
                 prepend-inner-icon="mdi-map-marker"
                 hide-details="true"
@@ -259,6 +260,21 @@
           <div class="content-company">
             <div class="content-left">
               <div class="left-title">Tuyển dụng</div>
+              <v-row
+                class="d-flex align-center p-b-52 p-t-8 p-l-8 p-r-8 p-t-16"
+              >
+                <v-col
+                  v-for="jobItem in listJobItem"
+                  :key="jobItem.PostId"
+                  lg="12"
+                  md="12"
+                  sm="12"
+                  xs="16"
+                  class="pt-0 content"
+                >
+                  <job-item :data="jobItem" @emit-alert="showAlert" :isAdmin="true"></job-item>
+                </v-col>
+              </v-row>
             </div>
           </div>
         </v-row>
@@ -270,10 +286,13 @@
 <script>
 import { Editor } from "@progress/kendo-editor-vue-wrapper";
 import axios from "axios";
+import JobItem from "../shared/JobItem.vue";
+import JobItemModel from "@/models/job-item.js";
 export default {
   name: "company",
   components: {
     Editor,
+    JobItem,
   },
 
   data: () => ({
@@ -300,31 +319,51 @@ export default {
     isLoadingName: false,
     isLoadingDescribe: false,
     isLoadingLocation: false,
+    listJobItem: [],
   }),
   created() {
-    if (this.$route.query.id) {
-      console.log("a");
-    } else {
-      if (sessionStorage.getItem("user") != null) {
-        var user = JSON.parse(sessionStorage.getItem("user"));
-        this.companyStorage = user.company;
-        this.company = { ...user.company };
-        if (this.company.companyAvatar != null) {
-          this.avatar = this.company.companyAvatar;
-        }
-        if (this.company.companyBanner != null) {
-          this.banner = this.company.companyBanner;
-        }
-        if (this.company.address == null) {
-          this.company.address = "Chưa có thông tin";
-        }
-        if (this.company.companyName == null) {
-          this.company.companyName = "Chưa có thông tin";
-        }
-        if (this.company.companyDescriber == null) {
-          this.company.companyDescriber = "Chưa có thông tin";
-        }
+    if (sessionStorage.getItem("user") != null) {
+      var user = JSON.parse(sessionStorage.getItem("user"));
+      this.companyStorage = user.company;
+      this.company = { ...user.company };
+      if (this.company.companyAvatar != null) {
+        this.avatar = this.company.companyAvatar;
       }
+      if (this.company.companyBanner != null) {
+        this.banner = this.company.companyBanner;
+      }
+      if (this.company.address == null) {
+        this.company.address = "Chưa có thông tin";
+      }
+      if (this.company.companyName == null) {
+        this.company.companyName = "Chưa có thông tin";
+      }
+      if (this.company.companyDescriber == null) {
+        this.company.companyDescriber = "Chưa có thông tin";
+      }
+
+      axios
+        .get(
+          "Post/getpostbycompanyid?companyID=" +
+            user.company.companyId +
+            "&userID=" +
+            user.id
+        )
+        .then((res) => {
+          res.data.result.forEach((element) => {
+            var objItem = new JobItemModel(
+              element.postId,
+              element.companyId,
+              element.title,
+              element.companyName,
+              element.companyAvatar,
+              element.isFavourite,
+              element.status
+            );
+            this.listJobItem.push(objItem);
+          });
+        })
+        .catch(() => {});
     }
   },
 
@@ -337,7 +376,6 @@ export default {
       setTimeout(() => {
         this.isShowAddler = false;
       }, 3000);
-      // setTimeout(this.isShowAddler = false, 3000);
     },
     onBannerPick(event) {
       const filebanner = event.target.files;
@@ -407,9 +445,9 @@ export default {
           this.showAlert("error", "Chỉnh sửa thất bại");
         });
     },
-    
+
     // sửa giới thiệu cty
-    updateCompanyDescribe(){
+    updateCompanyDescribe() {
       this.companyStorage.companyDescriber = this.company.companyDescriber;
       this.isLoadingDescribe = true;
       axios
@@ -536,16 +574,16 @@ export default {
   position: fixed;
   right: 0;
   bottom: 0;
-  Max-width: 250px;
+  max-width: 250px;
   z-index: 9999;
   height: 36px;
   font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-   font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
-.my-font{
-   font-family: Arial, Helvetica, sans-serif;
+.my-font {
+  font-family: Arial, Helvetica, sans-serif;
 }
 </style>

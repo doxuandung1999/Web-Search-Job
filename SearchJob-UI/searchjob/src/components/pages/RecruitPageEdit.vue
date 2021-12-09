@@ -281,7 +281,7 @@
         <v-row>
           <v-col>
             <editor
-              v-model="jobDescriber"
+              v-model="jobPost.JobDescribe"
               :resizable-content="true"
               :resizable-toolbar="true"
               rows="10"
@@ -301,7 +301,7 @@
         <v-row>
           <v-col>
             <editor
-              v-model="requestRecruit"
+              v-model="jobPost.Request"
               :resizable-content="true"
               :resizable-toolbar="true"
               rows="10"
@@ -319,7 +319,7 @@
         <v-row>
           <v-col>
             <editor
-              v-model="jobBenefit"
+              v-model="jobPost.Benefit"
               :resizable-content="true"
               :resizable-toolbar="true"
               rows="10"
@@ -339,7 +339,7 @@
         <v-row>
           <v-col>
             <editor
-              v-model="wayApply"
+              v-model="jobPost.MethodApply"
               :resizable-content="true"
               :resizable-toolbar="true"
               rows="10"
@@ -363,6 +363,7 @@ export default {
   },
   data: () => ({
     jobPost: {
+      PostId: null,
       UserId: null,
       CompanyId: null,
       Status: null,
@@ -826,6 +827,34 @@ export default {
     //   this.dateFormatted = this.formatDate(this.date);
     // },
   },
+  created() {
+    if (this.$route.params.PostID) {
+      axios
+        .get("Post/getpostbypostid?postID=" + this.$route.params.PostID)
+        .then((res) => {
+          console.log(res.data.result);
+          this.jobPost.PostId = res.data.result.postId;
+          this.date = this.formatDateBeforeShow(res.data.result.expireDate);
+
+          this.careerSelected = this.careers.filter(x => x.value ==  res.data.result.career)[0];
+          this.locationSelected = this.locations.filter(x => x.value ==  res.data.result.location)[0];
+          this.typeJobSelected = this.typeJobs.filter(x => x.value ==  res.data.result.typeJob)[0];
+          this.sexSelected = this.sexs.filter(x => x.value ==  res.data.result.requestSex)[0];
+
+          this.jobPost.Title = res.data.result.title;
+          this.jobPost.Salary = res.data.result.salary;
+          this.jobPost.Experience = res.data.result.experience;
+          this.jobPost.JobAddress = res.data.result.jobAddress;
+          this.jobPost.Status = res.data.result.status;
+          this.jobPost.JobDescribe = res.data.result.jobDescribe;
+          this.jobPost.Benefit = res.data.result.benefit;
+          this.jobPost.Request = res.data.result.request;
+          this.jobPost.MethodApply = res.data.result.methodApply;
+          this.jobPost.Quantity = parseInt(res.data.result.quantity);
+        })
+        .catch(() => {});
+    }
+  },
   methods: {
     validateForm() {
       var checkAll = true;
@@ -833,7 +862,7 @@ export default {
         this.isCheckTitle = true;
         checkAll = false;
       }
-      if (this.jobPost.Quantity == null || !this.jobPost.Quantity.trim()) {
+      if (this.jobPost.Quantity == null) {
         this.isCheckQuantity = true;
         checkAll = false;
       }
@@ -849,16 +878,16 @@ export default {
         this.isCheckAddress = true;
         checkAll = false;
       }
-      if (this.jobDescriber == null || !this.jobDescriber.trim()) {
+      if (this.jobPost.JobDescribe == null || !this.jobPost.JobDescribe.trim()) {
         checkAll = false;
       }
-      if (this.jobBenefit == null || !this.jobBenefit.trim()) {
+      if (this.jobPost.Benefit == null || !this.jobPost.Benefit.trim()) {
         checkAll = false;
       }
-      if (this.requestRecruit == null || !this.requestRecruit.trim()) {
+      if (this.jobPost.Request == null || !this.jobPost.Request.trim()) {
         checkAll = false;
       }
-      if (this.wayApply == null || !this.wayApply.trim()) {
+      if (this.jobPost.MethodApply == null || !this.jobPost.MethodApply.trim()) {
         checkAll = false;
       }
       var user = JSON.parse(sessionStorage.getItem("user"));
@@ -892,37 +921,15 @@ export default {
         this.jobPost.TypeJob = this.typeJobSelected.value;
         this.jobPost.RequestSex = this.sexSelected.value;
         this.jobPost.Status = 1;
-        this.jobPost.JobDescribe = this.jobDescriber;
-        this.jobPost.Benefit = this.jobBenefit;
-        this.jobPost.Request = this.requestRecruit;
-        this.jobPost.MethodApply = this.wayApply;
         this.jobPost.Quantity = parseInt(this.jobPost.Quantity);
 
         var user = JSON.parse(sessionStorage.getItem("user"));
         this.jobPost.UserId = user.id;
         this.jobPost.CompanyId = user.company.companyId;
-
         axios
-          .post("Post/createpost", this.jobPost)
+          .post("Post/updatepost", this.jobPost)
           .then(() => {
             this.isLoadingPost = false;
-            let setAll = (obj, val) =>
-              Object.keys(obj).forEach((k) => (obj[k] = val));
-            let setNull = (obj) => setAll(obj, null);
-            setNull(this.jobPost);
-            this.jobDescriber = "";
-            this.jobBenefit = "";
-            this.requestRecruit = "";
-            this.wayApply = "";
-            this.careerSelected = 0;
-            this.locationSelected = 0;
-            this.typeJobSelected = 0;
-            this.sexSelected = 0;
-            this.date = new Date(
-              Date.now() - new Date().getTimezoneOffset() * 60000
-            )
-              .toISOString()
-              .substr(0, 10);
             this.showAlert("info", "Hoàn thành bài đăng và chờ duyệt");
           })
           .catch(() => {});
@@ -934,17 +941,21 @@ export default {
           !userstorage.company.companyName.trim()
         ) {
           this.showAlert(
-          "error",
-          "Bổ sung thông tin công ty trước khi đăng tuyển"
-        );
-        }else{
+            "error",
+            "Bổ sung thông tin công ty trước khi đăng tuyển"
+          );
+        } else {
           this.showAlert(
-          "error",
-          "Bài đăng thiếu một số thông tin , vui lòng kiểm tra lại"
-        );
+            "error",
+            "Bài đăng thiếu một số thông tin , vui lòng kiểm tra lại"
+          );
         }
-        
       }
+    },
+    formatDateBeforeShow(date) {
+      if (!date) return null;
+      const dateobj = date.split("T");
+      return dateobj[0];
     },
     formatDate(date) {
       if (!date) return null;

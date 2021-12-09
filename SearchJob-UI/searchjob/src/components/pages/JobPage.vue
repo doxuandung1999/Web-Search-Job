@@ -4,7 +4,7 @@
       class="d-flex justify-center align-center"
       style="background-color: #f0f0f0; padding: 20px 0 0"
     >
-    <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
+      <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
         messageAlert
       }}</v-alert>
       <v-col cols="10" class="pt-0 content">
@@ -16,6 +16,63 @@
             >
           </div>
         </v-col>
+        <div v-show="!isData">
+          <div style="display: flex">
+            <div class="loading-content">
+              <VueSkeletonLoader
+                type="rect"
+                :width="40"
+                :height="40"
+                animation="fade"
+              />
+              <div class="name-load">
+                <VueSkeletonLoader
+                  :width="150"
+                  :height="14"
+                  animation="wave"
+                  rounded
+                />
+                <VueSkeletonLoader
+                  :width="100"
+                  :height="14"
+                  animation="wave"
+                  style="margin-top: 8px"
+                  rounded
+                />
+              </div>
+            </div>
+            <div class="loading-content">
+              <VueSkeletonLoader
+                type="rect"
+                :width="40"
+                :height="40"
+                animation="fade"
+              />
+              <div class="name-load">
+                <VueSkeletonLoader
+                  :width="150"
+                  :height="14"
+                  animation="wave"
+                  rounded
+                />
+                <VueSkeletonLoader
+                  :width="100"
+                  :height="14"
+                  animation="wave"
+                  style="margin-top: 8px"
+                  rounded
+                />
+              </div>
+            </div>
+          </div>
+          <VueSkeletonLoader
+            :width="500"
+            :height="14"
+            animation="wave"
+            style="margin-top: 30px"
+            rounded
+          />
+        </div>
 
         <v-carousel
           v-model="model"
@@ -23,10 +80,10 @@
           :height="'auto'"
           hide-delimiter-background
           progress-color="#4caf50"
-          style="background-color: #fff:padding:20px;"
-          
+          style="background-color: #fff:padding:20px;min-height: 250px"
+          v-show="isData"
         >
-          <v-carousel-item v-for="(page, i) in listPage" :key="i" >
+          <v-carousel-item v-for="(page, i) in listPage" :key="i">
             <v-row class="d-flex align-center p-b-52 p-t-8 p-l-8 p-r-8 p-t-16">
               <v-col
                 v-for="jobItem in page"
@@ -37,7 +94,11 @@
                 xs="16"
                 class="pt-0 content"
               >
-                <job-item :data="jobItem" @emit-alert="showAlert"></job-item>
+                <job-item
+                  :data="jobItem"
+                  @emit-alert="showAlert"
+                  :isAdmin="false"
+                ></job-item>
               </v-col>
             </v-row>
           </v-carousel-item>
@@ -51,10 +112,12 @@
 import JobItem from "../shared/JobItem.vue";
 import JobItemModel from "@/models/job-item.js";
 import axios from "axios";
+import VueSkeletonLoader from "skeleton-loader-vue";
 export default {
   name: "jobpage",
   components: {
     JobItem,
+    VueSkeletonLoader,
   },
   data() {
     return {
@@ -65,8 +128,9 @@ export default {
       listItemInPageOne: [],
       listItemInPageTwo: [],
       typeAlert: "success",
-    isShowAddler: false,
-    messageAlert: "",
+      isShowAddler: false,
+      messageAlert: "",
+      isData:false,
     };
   },
   methods: {
@@ -77,15 +141,17 @@ export default {
           .get("Post/getpostbyuserid?userID=" + user.id)
           .then((res) => {
             res.data.result.forEach((element) => {
-              var objItem = new JobItemModel(
-                element.postId,
-                element.companyId,
-                element.title,
-                element.companyName,
-                element.companyAvatar,
-                element.isFavourite
-              );
-              this.listJobItem.push(objItem);
+              if (element.status == 0) {
+                var objItem = new JobItemModel(
+                  element.postId,
+                  element.companyId,
+                  element.title,
+                  element.companyName,
+                  element.companyAvatar,
+                  element.isFavourite
+                );
+                this.listJobItem.push(objItem);
+              }
             });
             for (let i = 0; i < this.listJobItem.length; i++) {
               if (i < 12) {
@@ -96,23 +162,25 @@ export default {
             }
             this.listPage.push(this.listItemInPageOne);
             this.listPage.push(this.listItemInPageTwo);
+            this.isData = true;
           })
           .catch(() => {});
       } else {
         axios
           .get("Post/getallpost")
           .then((res) => {
-
             res.data.result.forEach((element) => {
-              var objItem = new JobItemModel(
-                element.postId,
-                element.companyId,
-                element.title,
-                element.companyName,
-                element.companyAvatar,
-                element.isFavourite
-              );
-              this.listJobItem.push(objItem);
+              if (element.status == 0) {
+                var objItem = new JobItemModel(
+                  element.postId,
+                  element.companyId,
+                  element.title,
+                  element.companyName,
+                  element.companyAvatar,
+                  element.isFavourite
+                );
+                this.listJobItem.push(objItem);
+              }
             });
             for (let i = 0; i < this.listJobItem.length; i++) {
               if (i < 12) {
@@ -123,11 +191,11 @@ export default {
             }
             this.listPage.push(this.listItemInPageOne);
             this.listPage.push(this.listItemInPageTwo);
+            this.isData = true;
           })
           .catch(() => {});
       }
 
-      
       // setTimeout(this.isShowAddler = false, 3000);
     },
 
@@ -138,8 +206,6 @@ export default {
       setTimeout(() => {
         this.isShowAddler = false;
       }, 3000);
-
- 
     },
   },
   created() {
@@ -165,5 +231,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.loading-content {
+  display: flex;
+  margin-right: 30px;
+}
+.name-load {
+  display: flex;
+  flex-direction: column;
+  margin-left: 8px;
 }
 </style>

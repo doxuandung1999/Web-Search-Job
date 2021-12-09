@@ -13,6 +13,7 @@ import { Editor } from '@progress/kendo-editor-vue-wrapper'
 import { EditorInstaller } from '@progress/kendo-editor-vue-wrapper'
 import './axios'
 import "./assets/scss/util.scss"
+import VueSkeletonLoader from 'skeleton-loader-vue'
 Vue.config.productionTip = false
 Vue.use(EditorInstaller)
 
@@ -20,5 +21,6 @@ new Vue({
   router,
   vuetify,
   Editor,
+  VueSkeletonLoader,
   render: h => h(App)
 }).$mount('#app')
