@@ -2,21 +2,40 @@
   <div class="w-full">
     <v-dialog v-model="dialog" persistent max-width="290">
       <template v-slot:activator="{ on, attrs }">
-        <v-btn style="display:none" color="primary" dark v-bind="attrs" v-on="on" ref="showConfirm"> </v-btn>
+        <v-btn
+          style="display: none"
+          color="primary"
+          dark
+          v-bind="attrs"
+          v-on="on"
+          ref="showConfirm"
+        >
+        </v-btn>
       </template>
       <v-card>
-        <v-card-title class="text-h5 my-font">
-          Thông báo
-        </v-card-title>
-        <v-card-text style="font-size : 14px" class="my-font"
+        <v-card-title class="text-h5 my-font"> Thông báo </v-card-title>
+        <v-card-text style="font-size: 14px" class="my-font"
           >Bạn có chắc chắn xóa bài đăng</v-card-text
         >
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="my-font" style="font-weight:bold" color="red darken-1" :loading="loadingDelete" text @click="deletePost(data)">
+          <v-btn
+            class="my-font"
+            style="font-weight: bold"
+            color="red darken-1"
+            :loading="loadingDelete"
+            text
+            @click="deletePost(data)"
+          >
             Đồng ý
           </v-btn>
-          <v-btn class="my-font" style="font-weight:bold" color="green darken-1" text @click="dialog = false">
+          <v-btn
+            class="my-font"
+            style="font-weight: bold"
+            color="green darken-1"
+            text
+            @click="dialog = false"
+          >
             Không
           </v-btn>
         </v-card-actions>
@@ -51,62 +70,125 @@
                 data.IsFavourite ? "mdi-heart" : "mdi-heart-outline"
               }}</v-icon>
             </div>
+            <!-- top: 28px; right: 12px;  -->
             <div
+              class="pos-absolute"
+              style="
+                display: flex;
+                flex-direction: column;
+                right: 12px;
+                top: 15px;
+              "
               :class="{ disable: !isAdmin }"
-              class="pos-absolute"
-              style="top: 28px; right: 12px; display: flex"
             >
+              <div style="display: flex">
+                <div
+                  v-show="data.Status == 0"
+                  style="color: #4caf50; font-size: 14px; padding-right: 14px"
+                >
+                  Đã duyệt
+                </div>
+                <div
+                  v-show="data.Status == 1"
+                  style="color: red; font-size: 14px; padding-right: 14px"
+                >
+                  Chưa duyệt
+                </div>
+                <v-btn
+                  outlined
+                  color="success"
+                  style="margin-right: 14px"
+                  class="font-family-app text-none"
+                  small
+                  @click="editPost(data)"
+                  >Sửa</v-btn
+                >
+                <v-btn
+                  color="error"
+                  class="font-family-app text-none"
+                  small
+                  @click="confimDelete"
+                  >Xóa</v-btn
+                >
+              </div>
+
               <div
-                v-show="data.Status == 0"
-                style="color: #4caf50; font-size: 14px; padding-right: 14px"
+                v-show="isShowDate"
+                style="
+                  font-size: 12px;
+                  margin-top: 4px;
+                  text-align: right;
+                  color: #797272;
+                "
               >
-                Đã duyệt
+                <span>Còn </span> <span>{{ driffDate }}</span>
+                <span> ngày</span>
               </div>
               <div
-                v-show="data.Status == 1"
-                style="color: red; font-size: 14px; padding-right: 14px"
+                v-show="!isShowDate"
+                style="
+                  font-size: 12px;
+                  margin-top: 4px;
+                  text-align: right;
+                  color: red;
+                "
               >
-                Chưa duyệt
+                Đã hết hạn
               </div>
-              <v-btn
-                outlined
-                color="success"
-                style="margin-right: 14px"
-                class="font-family-app text-none"
-                small
-                @click="editPost(data)"
-                >Sửa</v-btn
-              >
-              <v-btn
-                color="error"
-                class="font-family-app text-none"
-                small
-                @click="confimDelete"
-                >Xóa</v-btn
-              >
             </div>
+
             <div
-              class="pos-absolute"
-              style="top: 28px; right: 12px; display: flex"
               v-show="isManage"
+              class="pos-absolute"
+              style="
+                display: flex;
+                flex-direction: column;
+                right: 12px;
+                top: 15px;
+              "
             >
-              <v-btn
-                outlined
-                color="success"
-                class="font-family-app text-none"
-                style="margin-right: 14px"
-                small
-                @click="acceptPost(data)"
-                :loading="loadingAccept"
-                >Duyệt</v-btn
+              <div style="display: flex">
+                <v-btn
+                  outlined
+                  color="success"
+                  class="font-family-app text-none"
+                  style="margin-right: 14px"
+                  small
+                  @click="acceptPost(data)"
+                  :loading="loadingAccept"
+                  >Duyệt</v-btn
+                >
+                <v-btn
+                  color="error"
+                  class="font-family-app text-none"
+                  small
+                  @click="confimDelete"
+                  >Xóa</v-btn
+                >
+              </div>
+              <div
+                v-show="isShowDate"
+                style="
+                  font-size: 12px;
+                  margin-top: 4px;
+                  text-align: right;
+                  color: #797272;
+                "
               >
-              <v-btn
-                color="error"
-                class="font-family-app text-none"
-                small
-                @click="confimDelete"
-                >Xóa</v-btn
+                <span>Còn </span> <span>{{ driffDate }}</span>
+                <span> ngày</span>
+              </div>
+              <div
+                v-show="!isShowDate"
+                style="
+                  font-size: 12px;
+                  margin-top: 4px;
+                  text-align: right;
+                  color: red;
+                "
               >
+                Đã hết hạn
+              </div>
             </div>
           </v-card-title>
           <v-card-subtitle
@@ -132,7 +214,12 @@ export default {
     return {
       loadingAccept: false,
       dialog: false,
-      loadingDelete : false
+      loadingDelete: false,
+      driffDate: null,
+      nowDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .substr(0, 10),
+      isShowDate: true,
     };
   },
   props: {
@@ -151,7 +238,25 @@ export default {
   },
   computed: {},
   watch: {},
+  created() {
+    // console.log(this.nowDate);
+    this.driffDate = Math.floor(
+      (Date.parse(this.formatDateDriff(this.data.ExpireDate)) -
+        Date.parse(this.nowDate)) /
+        86400000
+    );
+    if (parseInt(this.driffDate) <= 0) {
+      this.isShowDate = false;
+    } else {
+      this.isShowDate = true;
+    }
+  },
   methods: {
+    formatDateDriff(date) {
+      if (!date) return null;
+      const dateobj = date.split("T");
+      return dateobj[0];
+    },
     toggleFavourite() {
       this.data.IsFavourite = !this.data.IsFavourite;
       var user = JSON.parse(sessionStorage.getItem("user"));
@@ -191,7 +296,6 @@ export default {
         .then(() => {
           this.loadingAccept = false;
           this.$emit("emit-alert", "success", "Thành công");
-          location.reload();
           this.$emit("load-page");
         })
         .catch(() => {
@@ -200,7 +304,7 @@ export default {
           this.$emit("emit-alert", "error", "Thất bại");
         });
     },
-    confimDelete(){
+    confimDelete() {
       this.dialog = true;
     },
     deletePost(data) {
@@ -210,14 +314,13 @@ export default {
           this.loadingDelete = false;
           this.dialog = false;
           this.$emit("emit-alert", "success", "Xóa bài đăng thành công");
-          location.reload();
+          this.$emit("load-page");
         })
         .catch(() => {
           this.loadingDelete = false;
           // this.showAlert("error", "thêm công việc quan tâm thất bại");
           this.$emit("emit-alert", "error", "Thất bại");
         });
-      
     },
   },
   mounted() {

@@ -17,7 +17,7 @@
         active-class="bg-active"
         v-for="menu in menus"
         :key="menu.title"
-        
+        :to="menu.route"
         @click="routeToPage(menu.route)"
         replace
         link
@@ -79,10 +79,7 @@ export default {
   data: () => ({
     menus: [
       { title: "Việc làm", route: "job" },
-      { title: "Việc làm quan tâm", route: "job-care" },
-      { title: "Công ty", route: "company" },
-      { title: "Đăng tuyển", route: "recruit" },
-      { title: "Quản lý bài đăng", route: "manage"},
+     
     ],
     items: [{ title: "Đăng xuất" }],
     userName: "",
@@ -116,6 +113,14 @@ export default {
           { title: "Việc làm quan tâm", route: "job-care" },
         ];
       }
+      if (user.role == 1) {
+        this.menus = [
+          { title: "Việc làm", route: "job" },
+          { title: "Việc làm quan tâm", route: "job-care" },
+          { title: "Công ty", route: "company" },
+          { title: "Đăng tuyển", route: "recruit" },
+        ];
+      }
       if (user.role == 2) { // admin
         this.menus = [
           { title: "Việc làm", route: "job" },
@@ -143,7 +148,7 @@ export default {
 }
 
 .bg-active {
-  background-color: white !important;
+  
   color: #4caf50 !important;
 }
 </style>

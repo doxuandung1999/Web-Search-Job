@@ -37,6 +37,11 @@ export default new Router({
                     component : JobPage,
                 },
                 {
+                    path : "job",
+                    name: "job/:jobName/:career",
+                    component : JobPage,
+                },
+                {
                     path : "job/:jobID",
                     name: "job-detail",
                     component : () => import ('@/components/pages/JobPageDetail.vue'),

@@ -6,8 +6,9 @@ export default class JobItemModel {
     CompanyAvatar;
     IsFavourite;
     Status;
+    ExpireDate;
 
-    constructor(PostId, CompanyId, Title, CompanyName, CompanyAvatar, IsFavourite,Status) {
+    constructor(PostId, CompanyId, Title, CompanyName, CompanyAvatar, IsFavourite,Status,ExpireDate) {
         this.PostId = PostId
         this.CompanyId = CompanyId
         this.Title = Title
@@ -15,6 +16,7 @@ export default class JobItemModel {
         this.CompanyAvatar = CompanyAvatar
         this.IsFavourite = IsFavourite
         this.Status = Status
+        this.ExpireDate = ExpireDate
 
     }
 }

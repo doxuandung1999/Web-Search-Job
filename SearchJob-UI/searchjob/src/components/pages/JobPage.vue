@@ -74,6 +74,10 @@
           />
         </div>
 
+        <div style="padding-bottom: 30px" v-show="!haveData && isData">
+          <i>Không có bài đăng</i>
+        </div>
+
         <v-carousel
           v-model="model"
           show-arrows-on-hover
@@ -81,7 +85,8 @@
           hide-delimiter-background
           progress-color="#4caf50"
           style="background-color: #fff:padding:20px;min-height: 250px"
-          v-show="isData"
+          v-if="haveData && isData"
+          ref="listPost"
         >
           <v-carousel-item v-for="(page, i) in listPage" :key="i">
             <v-row class="d-flex align-center p-b-52 p-t-8 p-l-8 p-r-8 p-t-16">
@@ -130,7 +135,11 @@ export default {
       typeAlert: "success",
       isShowAddler: false,
       messageAlert: "",
-      isData:false,
+      isData: false,
+      haveData: false,
+      nowDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .substr(0, 10),
     };
   },
   methods: {
@@ -141,7 +150,7 @@ export default {
           .get("Post/getpostbyuserid?userID=" + user.id)
           .then((res) => {
             res.data.result.forEach((element) => {
-              if (element.status == 0) {
+              if (element.status == 0 && Math.floor( (Date.parse(this.formatDateDriff(element.expireDate)) - Date.parse(this.nowDate)) / 86400000 > 0)) {
                 var objItem = new JobItemModel(
                   element.postId,
                   element.companyId,
@@ -151,6 +160,7 @@ export default {
                   element.isFavourite
                 );
                 this.listJobItem.push(objItem);
+                this.haveData = true;
               }
             });
             for (let i = 0; i < this.listJobItem.length; i++) {
@@ -170,7 +180,7 @@ export default {
           .get("Post/getallpost")
           .then((res) => {
             res.data.result.forEach((element) => {
-              if (element.status == 0) {
+              if (element.status == 0 && Math.floor( (Date.parse(this.formatDateDriff(element.expireDate)) - Date.parse(this.nowDate)) / 86400000 > 0)) {
                 var objItem = new JobItemModel(
                   element.postId,
                   element.companyId,
@@ -180,6 +190,7 @@ export default {
                   element.isFavourite
                 );
                 this.listJobItem.push(objItem);
+                this.haveData = true;
               }
             });
             for (let i = 0; i < this.listJobItem.length; i++) {
@@ -199,6 +210,50 @@ export default {
       // setTimeout(this.isShowAddler = false, 3000);
     },
 
+    getPostSearch(jobName, career, location,userID) {
+      this.isData = false;
+      this.haveData = false;
+      this.listPage = [];
+      this.listJobItem = [];
+      this.listItemInPageOne = [];
+      this.listItemInPageTwo = [];
+      axios
+        .get("Post/getpostbysearch?jobName=" +jobName+ "&career=" + career + "&location="+location + "&userID="+userID)
+        .then((res) => {
+          res.data.result.forEach((element) => {
+            if (element.status == 0 && Math.floor( (Date.parse(this.formatDateDriff(element.expireDate)) - Date.parse(this.nowDate)) / 86400000 > 0)) {
+              var objItem = new JobItemModel(
+                element.postId,
+                element.companyId,
+                element.title,
+                element.companyName,
+                element.companyAvatar,
+                element.isFavourite
+              );
+              this.listJobItem.push(objItem);
+              this.haveData = true;
+            }
+          });
+          for (let i = 0; i < this.listJobItem.length; i++) {
+            if (i < 12) {
+              this.listItemInPageOne.push(this.listJobItem[i]);
+            } else {
+              this.listItemInPageTwo.push(this.listJobItem[i]);
+            }
+          }
+          this.listPage.push(this.listItemInPageOne);
+          this.listPage.push(this.listItemInPageTwo);
+          this.isData = true;
+        })
+        .catch(() => {});
+    },
+
+    formatDateDriff(date) {
+      if (!date) return null;
+      const dateobj = date.split("T");
+      return dateobj[0];
+    },
+
     showAlert(typeAlert, messageAlert) {
       this.typeAlert = typeAlert;
       this.messageAlert = messageAlert;
@@ -209,7 +264,21 @@ export default {
     },
   },
   created() {
-    this.initData();
+    if (!this.$route.query.career) {
+      this.initData();
+    }else if(this.$route.query.career >= 0){
+      var user = JSON.parse(sessionStorage.getItem("user"));
+        this.getPostSearch(this.$route.query.jobName , this.$route.query.career , this.$route.query.location,user.id);
+    }
+  },
+  watch: {
+    $route(to) {
+      if (to.query.career >= 0) {
+        var user = JSON.parse(sessionStorage.getItem("user"));
+        this.getPostSearch(to.query.jobName , to.query.career , to.query.location,user.id);
+      }
+    }
+   
   },
 };
 </script>

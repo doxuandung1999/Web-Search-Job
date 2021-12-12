@@ -136,6 +136,9 @@ export default {
     isLoadingDescribe: false,
     isLoadingLocation: false,
     listJobItem: [],
+    nowDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .substr(0, 10),
   }),
   created() {
     if (this.$route.params.companyID) {
@@ -173,7 +176,7 @@ export default {
           )
           .then((res) => {
             res.data.result.forEach((element) => {
-              if (element.status == 0) {
+              if (element.status == 0 && Math.floor( (Date.parse(this.formatDateDriff(element.expireDate)) - Date.parse(this.nowDate)) / 86400000 > 0)) {
                 var objItem = new JobItemModel(
                   element.postId,
                   element.companyId,
@@ -201,6 +204,11 @@ export default {
         this.isShowAddler = false;
       }, 3000);
       // setTimeout(this.isShowAddler = false, 3000);
+    },
+    formatDateDriff(date) {
+      if (!date) return null;
+      const dateobj = date.split("T");
+      return dateobj[0];
     },
   },
 };

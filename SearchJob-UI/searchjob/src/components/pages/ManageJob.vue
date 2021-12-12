@@ -139,7 +139,12 @@ export default {
   },
   methods: {
     initData() {
+      this.haveData = false;
+      this.isData = false;
       this.listPage = [];
+      this.listJobItem = [];
+      this.listItemInPageOne = [];
+      this.listItemInPageTwo = [];
       var user = JSON.parse(sessionStorage.getItem("user"));
       if (user) {
         axios
@@ -152,7 +157,9 @@ export default {
                 element.title,
                 element.companyName,
                 element.companyAvatar,
-                element.isFavourite
+                element.isFavourite,
+                element.status,
+                element.expireDate
               );
               this.listJobItem.push(objItem);
               this.haveData = true;

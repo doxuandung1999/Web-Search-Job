@@ -11,12 +11,10 @@
         <v-col>
           <div class="fs-18 bold flex-m">
             <v-icon class="m-r-4" color="green darken-2">mdi-star</v-icon
-            ><span style="line-height: 60px"
-              >TIN TUYỂN DỤNG QUAN TÂM</span
-            >
+            ><span style="line-height: 60px">TIN TUYỂN DỤNG QUAN TÂM</span>
           </div>
         </v-col>
-         <div v-show="!isData">
+        <div v-show="!isData">
           <div style="display: flex">
             <div class="loading-content">
               <VueSkeletonLoader
@@ -73,6 +71,9 @@
             rounded
           />
         </div>
+        <div style="padding-bottom: 30px" v-show="!haveData && isData">
+          <i>Không có tin quan tâm</i>
+        </div>
 
         <v-carousel
           v-model="model"
@@ -81,6 +82,7 @@
           hide-delimiter-background
           progress-color="#4caf50"
           style="background-color: #fff:padding:20px;"
+          v-if="haveData && isData"
         >
           <v-carousel-item v-for="(page, i) in listPage" :key="i">
             <v-row class="d-flex align-center p-b-52 p-t-8 p-l-8 p-r-8 p-t-16">
@@ -128,6 +130,10 @@ export default {
       isShowAddler: false,
       messageAlert: "",
       isData: false,
+      haveData: false,
+      nowDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .substr(0, 10),
     };
   },
   methods: {
@@ -138,7 +144,16 @@ export default {
           .get("Post/getpostbyuserid?userID=" + user.id)
           .then((res) => {
             res.data.result.forEach((element) => {
-              if (element.status == 0 && element.isFavourite) {
+              if (
+                element.status == 0 &&
+                element.isFavourite &&
+                Math.floor(
+                  (Date.parse(this.formatDateDriff(element.expireDate)) -
+                    Date.parse(this.nowDate)) /
+                    86400000 >
+                    0
+                )
+              ) {
                 var objItem = new JobItemModel(
                   element.postId,
                   element.companyId,
@@ -148,6 +163,7 @@ export default {
                   element.isFavourite
                 );
                 this.listJobItem.push(objItem);
+                this.haveData = true;
               }
             });
             for (let i = 0; i < this.listJobItem.length; i++) {
@@ -162,9 +178,14 @@ export default {
             this.isData = true;
           })
           .catch(() => {});
-      } 
+      }
 
       // setTimeout(this.isShowAddler = false, 3000);
+    },
+    formatDateDriff(date) {
+      if (!date) return null;
+      const dateobj = date.split("T");
+      return dateobj[0];
     },
 
     showAlert(typeAlert, messageAlert) {

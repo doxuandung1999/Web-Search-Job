@@ -272,7 +272,7 @@
                   xs="16"
                   class="pt-0 content"
                 >
-                  <job-item :data="jobItem" @emit-alert="showAlert" :isAdmin="true"></job-item>
+                  <job-item :data="jobItem" @emit-alert="showAlert" @load-page="intPost" :isAdmin="true"></job-item>
                 </v-col>
               </v-row>
             </div>
@@ -358,7 +358,8 @@ export default {
               element.companyName,
               element.companyAvatar,
               element.isFavourite,
-              element.status
+              element.status,
+              element.expireDate
             );
             this.listJobItem.push(objItem);
           });
@@ -376,6 +377,33 @@ export default {
       setTimeout(() => {
         this.isShowAddler = false;
       }, 3000);
+    },
+    intPost(){
+      var user = JSON.parse(sessionStorage.getItem("user"));
+      this.listJobItem = [];
+      axios
+        .get(
+          "Post/getpostbycompanyid?companyID=" +
+            user.company.companyId +
+            "&userID=" +
+            user.id
+        )
+        .then((res) => {
+          res.data.result.forEach((element) => {
+            var objItem = new JobItemModel(
+              element.postId,
+              element.companyId,
+              element.title,
+              element.companyName,
+              element.companyAvatar,
+              element.isFavourite,
+              element.status,
+              element.expireDate
+            );
+            this.listJobItem.push(objItem);
+          });
+        })
+        .catch(() => {});
     },
     onBannerPick(event) {
       const filebanner = event.target.files;

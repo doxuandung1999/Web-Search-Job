@@ -914,10 +914,10 @@ export default {
             this.jobBenefit = "";
             this.requestRecruit = "";
             this.wayApply = "";
-            this.careerSelected = 0;
-            this.locationSelected = 0;
-            this.typeJobSelected = 0;
-            this.sexSelected = 0;
+            this.careerSelected = this.careers[0];
+            this.locationSelected = this.locations[0];
+            this.typeJobSelected = this.typeJobs[0];
+            this.sexSelected = this.sexs[0];
             this.date = new Date(
               Date.now() - new Date().getTimezoneOffset() * 60000
             )

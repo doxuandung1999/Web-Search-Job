@@ -10,6 +10,7 @@
           height="36px"
           class="text-none"
           placeholder="Tên công việc, vị trí bạn muốn ứng tuyển"
+          v-model="jobNameSearch"
         ></v-text-field>
     
       
@@ -44,7 +45,7 @@
           style="background-color: #4caf50 !important"
           class="font-family-app ml-2 text-none"
           color="white--text"
-          @click="test"
+          @click="search"
         >
           <v-icon left> mdi-magnify </v-icon>
           Tìm kiếm</v-btn
@@ -437,14 +438,32 @@ export default {
         value: 63,
       },
     ],
+    jobNameSearch: "",
  
   }),
 
   methods: {
-    test(){
-      console.log(this.jobSelected.value);
+    search(){
+       this.$router.push({ name: "job", query: { jobName: this.jobNameSearch, career : this.careerSelected.value , location : this.locationSelected.value} });
+      // this.$router.replace({ name: "job", params: { jobName: this.jobNameSearch, career : this.careerSelected.value} });
+    },
+  },
+
+  watch: {
+    $route(to,from) {
+      if (to.query.location == null && from.query.location >= 0){
+        this.careerSelected = this.careers[0];
+        this.locationSelected = this.locations[0];
+        this.jobNameSearch = "";
+      }else if(to.query.location >= 0 && from.query.location == null){
+        this.careerSelected = this.careers[to.query.career];
+        this.locationSelected = this.locations[to.query.location];
+        this.jobNameSearch = to.query.jobName;
+      }
     },
   }
+
+  
 
 };
 </script>
