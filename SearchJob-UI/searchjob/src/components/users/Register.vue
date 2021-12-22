@@ -161,7 +161,8 @@
                           />
                           <v-text-field
                             label="Email"
-                            name="Email"
+                            name="EmailRegister"
+                        
                             v-model="UserEmailRegister"
                             prepend-icon="email"
                             type="text"
@@ -234,7 +235,7 @@ export default {
   data: () => ({
     step: 2,
     UserNameRegister: null,
-    UserEmailRegister: null,
+    UserEmailRegister: "",
     PasswordRegister: null,
     PasswordReTypeRegister: null,
     Role: 0,

@@ -1,4 +1,4 @@
-<template>
+<template v-slot:activator="{ on }">
   <v-container style="max-width: 100% !important">
     <v-row
       class="d-flex justify-center align-center"
@@ -32,6 +32,7 @@
               </div>
             </div>
             <div class="btn-group">
+              <popup></popup>
               <v-btn
                 block
                 large
@@ -189,8 +190,13 @@
 
 <script>
 import axios from "axios";
+import Popup from '../shared/Popup.vue';
 export default {
+  components: { Popup },
   name: "JobPageDetail",
+  comments: {
+    Popup
+  },
   data: () => ({
     jobPost: {},
     expireDate: null,
@@ -649,6 +655,10 @@ export default {
         this.jobPost.isFavourite = !this.jobPost.isFavourite;
         });
     },
+
+    sendCV(){
+      console.log("click");
+    },
     navigateCompany() {
       this.$router.push({
         name: "company-detail",
@@ -721,6 +731,8 @@ a {
   }
   .btn-group {
     padding: 0 16px;
+    display: flex;
+    flex-direction: column;
   }
 
   .box-title {
