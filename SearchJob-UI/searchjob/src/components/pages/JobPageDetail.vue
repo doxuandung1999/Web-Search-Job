@@ -4,18 +4,14 @@
       class="d-flex justify-center align-center"
       style="background-color: #f0f0f0; padding: 20px 0 0"
     >
-     <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
+      <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
         messageAlert
       }}</v-alert>
       <v-col cols="10" class="pt-0 content">
         <v-row class="w-full">
           <div class="box-white flex-m m-t-32 box-detail-job w-full">
             <div class="logo">
-              <img
-                :src="avatar"
-                alt=""
-                srcset=""
-              />
+              <img :src="avatar" alt="" srcset="" />
             </div>
             <div class="box-info-job flex-grow-1 my-font">
               <h1 class="job-title text-highlight bold">
@@ -60,7 +56,15 @@
             </div>
           </div>
         </v-row>
-        <v-row class="w-full">
+
+        <v-row style="padding-top: 8" class="w-full m-t-16">
+          <v-tabs v-model="tab">
+            <v-tab>Chi tiết tin</v-tab>
+            <v-tab>Danh sách ứng viên</v-tab>
+          </v-tabs>
+        </v-row>
+
+        <v-row v-show="tab == 0 || tab==null" class="w-full">
           <div class="box-white flex-t m-t-32 box-detail-job w-full">
             <v-col style="padding: 0 !important" cols="8">
               <h1 class="box-title">Chi tiết tin tuyển dụng</h1>
@@ -182,6 +186,14 @@
             </v-col>
           </div>
         </v-row>
+
+         <v-row v-show="tab ==1" class="w-full">
+          <div class="box-white flex-t m-t-32 box-detail-job w-full">
+            <v-col style="padding: 0 !important" cols="12">
+              <list-candidate></list-candidate>
+            </v-col>
+          </div>
+        </v-row>
       </v-col>
     </v-row>
   </v-container>
@@ -189,13 +201,17 @@
 
 <script>
 import axios from "axios";
+import ListCandidate from "./ListCandidate.vue"
 export default {
   name: "JobPageDetail",
+  components:{
+    ListCandidate
+  },
   data: () => ({
     jobPost: {},
     expireDate: null,
     avatar: require("../../assets/default_company_logo.png"),
-    typeJob : "",
+    typeJob: "",
     sex: "",
     careers: [
       {
@@ -592,23 +608,33 @@ export default {
     typeAlert: "success",
     isShowAddler: false,
     messageAlert: "",
+    tab: null,
   }),
-  created(){
+  created() {
     this.initData();
   },
   methods: {
-    initData(){
+    initData() {
       var user = JSON.parse(sessionStorage.getItem("user"));
       if (user) {
         axios
-          .get("Post/getpost?postID=" + this.$route.params.jobID + "&userID=" + user.id)
+          .get(
+            "Post/getpost?postID=" +
+              this.$route.params.jobID +
+              "&userID=" +
+              user.id
+          )
           .then((res) => {
             this.jobPost = res.data.result;
-            if(this.jobPost.companyAvatar != null){
+            if (this.jobPost.companyAvatar != null) {
               this.avatar = this.jobPost.companyAvatar;
               this.expireDate = this.formatDate(this.jobPost.expireDate);
-              this.typeJob = this.typeJobs.filter(x => x.value == this.jobPost.typeJob)[0].name;
-              this.sex = this.sexs.filter(x => x.value == this.jobPost.requestSex)[0].name;
+              this.typeJob = this.typeJobs.filter(
+                (x) => x.value == this.jobPost.typeJob
+              )[0].name;
+              this.sex = this.sexs.filter(
+                (x) => x.value == this.jobPost.requestSex
+              )[0].name;
             }
           })
           .catch(() => {});
@@ -630,29 +656,23 @@ export default {
       this.jobPost.isFavourite = !this.jobPost.isFavourite;
       var user = JSON.parse(sessionStorage.getItem("user"));
       var param = {
-        UserId : user.id,
-        PostId : this.jobPost.postId
-      }
+        UserId: user.id,
+        PostId: this.jobPost.postId,
+      };
       axios
         .post("JobCare/updatejobcare", param)
         .then(() => {
-          this.showAlert(
-          "success",
-          "Thành công"
-        );
+          this.showAlert("success", "Thành công");
         })
         .catch(() => {
-          this.showAlert(
-          "error",
-          "Thất bại"
-        );
-        this.jobPost.isFavourite = !this.jobPost.isFavourite;
+          this.showAlert("error", "Thất bại");
+          this.jobPost.isFavourite = !this.jobPost.isFavourite;
         });
     },
     navigateCompany() {
       this.$router.push({
         name: "company-detail",
-        params: { companyID: this.$route.params.jobID  },
+        params: { companyID: this.$route.params.jobID },
       });
     },
     formatDate(date) {
