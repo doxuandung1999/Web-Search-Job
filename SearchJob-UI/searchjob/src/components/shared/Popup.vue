@@ -4,13 +4,12 @@
       <v-btn
         block
         large
-        class="ma-2 m-t-32"
         style="height: 36px !important"
         color="success"
         v-on="on"
         v-bind="attrs"
       >
-        <v-icon left dark class="m-r-16"> mdi-heart-outline </v-icon>
+        <v-icon left dark class="m-r-16"> mdi-send </v-icon>
         <span style="font-weight: 500; text-transform: none">Ứng tuyển</span>
       </v-btn>
     </template>
@@ -27,9 +26,12 @@
           <v-text-field
             color="#4caf50"
             class="pl-2 my-font"
-            style="font-size: 18px"
+            style="font-size: 14px"
             hide-details="true"
             label="Họ và tên"
+            v-model="userName"
+            :error="isCheckName"
+            @click="isCheckName = false"
           ></v-text-field>
           <v-menu
             v-model="menu2"
@@ -44,14 +46,13 @@
                 v-model="computedDateFormatted"
                 persistent-hint
                 prepend-inner-icon="mdi-calendar"
-                readonly
                 v-bind="attrs"
                 v-on="on"
                 class="pl-2 pt-6"
                 style="font-size: 14px"
                 color="#4caf50"
                 hide-details="true"
-                label="Năm sinh"
+                label="Ngày sinh"
                 dense
               ></v-text-field>
             </template>
@@ -64,9 +65,12 @@
           <v-text-field
             color="#4caf50"
             class="pl-2 my-font pt6"
-            style="font-size: 18px"
+            style="font-size: 14px"
             hide-details="true"
             label="vị trí ứng tuyển"
+            v-model="jobPosition"
+            :error="isCheckPosition"
+            @click="isCheckPosition = false"
           ></v-text-field>
           <input
             type="file"
@@ -80,28 +84,36 @@
             large
             style="height: 36px !important"
             color="success"
-            class="mt-8"
+            class="mt-8 text-none"
             @click="upCV"
           >
             Đính kèm file CV
           </v-btn>
-          <div v-show="fileName" style="font-size: 14px; margin-top: 7px">{{fileName}}</div>
-          <div v-show="!fileName" style="color:red;font-size: 14px; margin-top: 7px"><i>chưa đính kèm CV</i></div>
+          <div v-show="fileName" style="font-size: 14px; margin-top: 7px">
+            {{ fileName }}
+          </div>
+          <div
+            v-show="!fileName"
+            style="color: red; font-size: 14px; margin-top: 7px"
+          >
+            <i>chưa đính kèm CV</i>
+          </div>
         </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          class="my-font"
+          class="my-font text-none"
           style="font-weight: bold"
           color="success"
           text
           @click="SendCV"
+          :loading="isLoading"
         >
           Gửi
         </v-btn>
         <v-btn
-          class="my-font"
+          class="my-font text-none"
           style="font-weight: bold"
           color="red darken-1"
           text
@@ -116,6 +128,7 @@
 
 <script>
 import { fb } from "./firebase";
+import axios from "axios";
 export default {
   name: "Popup",
   data() {
@@ -131,21 +144,119 @@ export default {
       // ),
       menu1: false,
       menu2: false,
+      userName: null,
       fileCV: null,
       fileName: "",
-      isHaveCV: false
+      jobPosition: null,
+      linkFileCV: null,
+      isHaveCV: false,
+      computedDateFormatted: null,
+      isCheckPosition: false,
+      isCheckName: false,
+      isLoading: false,
     };
   },
-  props: {},
-  computed: {
-    computedDateFormatted() {
-      return this.formatDate(this.date);
+  props: {
+    PostId: {
+      type: Number,
+      default: null,
+    },
+    CompanyId: {
+      type: Number,
+      default: null,
     },
   },
-  watch: {},
-  created() {},
+  computed: {
+    // computedDateFormatted() {
+    //   return this.formatDate(this.date);
+    // },
+  },
+  watch: {
+    date(val) {
+      this.computedDateFormatted = this.formatDate(val);
+    },
+  },
+  created() {
+    this.computedDateFormatted = this.formatDate(this.date);
+  },
   methods: {
-    SendCV() {},
+    SendCV() {
+      this.isLoading = true;
+      var check = this.validateProfile();
+      if (check) {
+        this.isCheckPosition = false;
+        this.isCheckName = false;
+        var storageRef = fb
+          .storage()
+          .ref("profiles/" + Math.random() + "_" + this.fileCV.name);
+
+        let uploadTask = storageRef.put(this.fileCV);
+
+        uploadTask.on(
+          "state_changed",
+          () => {},
+          () => {
+            // Handle unsuccessful uploads
+          },
+          () => {
+            // Handle successful uploads on complete
+            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              // console.log(downloadURL);
+              // var user = JSON.parse(sessionStorage.getItem("user"));
+              var param = {
+                CompanyId: this.CompanyId,
+                PostId: this.PostId,
+                Name: this.userName,
+                JobPosition: this.jobPosition,
+                NameFileCV: this.fileName,
+                LinkFileCV: downloadURL,
+                BirthDay: this.parseDate(this.computedDateFormatted),
+              };
+              axios
+                .post("Profiles/createprofile", param)
+                .then(() => {
+                  this.$emit("emit-alert", "success", "Thành công");
+                  this.isLoading = false;
+                  this.dialog = false;
+                  this.fileCV = null;
+                  this.userName = null;
+                  this.jobPosition = null;
+                  this.fileName = null;
+                  this.date = new Date(
+                    Date.now() - new Date().getTimezoneOffset() * 60000
+                  )
+                    .toISOString()
+                    .substr(0, 10);
+                })
+                .catch(() => {
+                  // this.showAlert("error", "thêm công việc quan tâm thất bại");
+                  this.$emit("emit-alert", "error", "Thất bại");
+                  this.isLoading = false;
+                });
+            });
+          }
+        );
+      } else {
+        this.isLoading = false;
+      }
+    },
+    validateProfile() {
+      var check = true;
+      if (this.userName == null || !this.userName.trim()) {
+        check = false;
+        this.isCheckName = true;
+      }
+      if (this.jobPosition == null || !this.jobPosition.trim()) {
+        check = false;
+        this.isCheckPosition = true;
+      }
+      if (this.fileCV == null) {
+        check = false;
+      }
+      return check;
+    },
     upCV() {
       this.$refs.inputAvatar.click();
     },
@@ -182,6 +293,11 @@ export default {
 
       const [year, month, day] = date.split("-");
       return `${day}/${month}/${year}`;
+    },
+
+    parseDate(date) {
+      const [day, month, year] = date.split("/");
+      return `${year}-${month}-${day}`;
     },
   },
   mounted() {
@@ -258,5 +374,8 @@ img {
 }
 .w-item-company {
   width: calc(100% - 250px);
+}
+.v-text-field input {
+  font-size: 14px !important;
 }
 </style>

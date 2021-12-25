@@ -4,18 +4,14 @@
       class="d-flex justify-center align-center"
       style="background-color: #f0f0f0; padding: 20px 0 0"
     >
-     <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
+      <v-alert class="s-alert" :type="typeAlert" v-show="isShowAddler">{{
         messageAlert
       }}</v-alert>
       <v-col cols="10" class="pt-0 content">
         <v-row class="w-full">
           <div class="box-white flex-m m-t-32 box-detail-job w-full">
             <div class="logo">
-              <img
-                :src="avatar"
-                alt=""
-                srcset=""
-              />
+              <img :src="avatar" alt="" srcset="" />
             </div>
             <div class="box-info-job flex-grow-1 my-font">
               <h1 class="job-title text-highlight bold">
@@ -32,7 +28,10 @@
               </div>
             </div>
             <div class="btn-group">
-              <popup></popup>
+              <div style="margin:8px;width: 100%;">
+                <popup  :PostId="jobPost.postId" :CompanyId="jobPost.companyId" @emit-alert="showAlert"></popup>
+              </div>
+              
               <v-btn
                 block
                 large
@@ -51,7 +50,7 @@
 
               <div
                 @click="updateJobCare"
-                style="cursor: pointer"
+                style="cursor: pointer;text-align: center;"
                 :class="{ disable: !jobPost.isFavourite }"
               >
                 <v-icon class="icon" size="40px" color="#4caf50">
@@ -61,7 +60,15 @@
             </div>
           </div>
         </v-row>
-        <v-row class="w-full">
+
+        <v-row style="padding-top: 8" class="w-full m-t-16">
+          <v-tabs v-model="tab" color="green">
+            <v-tab class="text-none">Chi tiết tin</v-tab>
+            <v-tab v-show="isPostOfCompany" class="text-none">Danh sách ứng viên</v-tab>
+          </v-tabs>
+        </v-row>
+
+        <v-row v-show="tab == 0 || tab==null" class="w-full">
           <div class="box-white flex-t m-t-32 box-detail-job w-full">
             <v-col style="padding: 0 !important" cols="8">
               <h1 class="box-title">Chi tiết tin tuyển dụng</h1>
@@ -161,6 +168,9 @@
               <div class="box-how-to-apply">
                 <div class="title-detail">Cách thức ứng tuyển</div>
                 <div v-html="jobPost.methodApply"></div>
+                <div style="width:145px;padding-top:8px">
+                   <popup :PostId="jobPost.postId" :CompanyId="jobPost.companyId" @emit-alert="showAlert"></popup>
+                </div>
               </div>
             </v-col>
             <v-col cols="4">
@@ -183,6 +193,14 @@
             </v-col>
           </div>
         </v-row>
+
+         <v-row v-show="tab ==1" class="w-full">
+          <div class="box-white flex-t m-t-32 box-detail-job w-full">
+            <v-col style="padding: 0 !important" cols="12">
+              <list-candidate :PostId="jobPost.postId"></list-candidate>
+            </v-col>
+          </div>
+        </v-row>
       </v-col>
     </v-row>
   </v-container>
@@ -191,17 +209,15 @@
 <script>
 import axios from "axios";
 import Popup from '../shared/Popup.vue';
+import ListCandidate from "./ListCandidate.vue"
 export default {
-  components: { Popup },
+  components: { Popup , ListCandidate},
   name: "JobPageDetail",
-  comments: {
-    Popup
-  },
   data: () => ({
     jobPost: {},
     expireDate: null,
     avatar: require("../../assets/default_company_logo.png"),
-    typeJob : "",
+    typeJob: "",
     sex: "",
     careers: [
       {
@@ -323,7 +339,7 @@ export default {
         value: 1,
       },
       {
-        name: "Bà Rịa – Vũng Tàu",
+        name: "Bà Rịa - Vũng Tàu",
         value: 2,
       },
       {
@@ -598,23 +614,38 @@ export default {
     typeAlert: "success",
     isShowAddler: false,
     messageAlert: "",
+    tab: null,
+    isPostOfCompany: false,
   }),
-  created(){
+  created() {
     this.initData();
   },
   methods: {
-    initData(){
+    initData() {
       var user = JSON.parse(sessionStorage.getItem("user"));
       if (user) {
         axios
-          .get("Post/getpost?postID=" + this.$route.params.jobID + "&userID=" + user.id)
+          .get(
+            "Post/getpost?postID=" +
+              this.$route.params.jobID +
+              "&userID=" +
+              user.id
+          )
           .then((res) => {
             this.jobPost = res.data.result;
-            if(this.jobPost.companyAvatar != null){
+            if (this.jobPost.companyAvatar != null) {
               this.avatar = this.jobPost.companyAvatar;
               this.expireDate = this.formatDate(this.jobPost.expireDate);
-              this.typeJob = this.typeJobs.filter(x => x.value == this.jobPost.typeJob)[0].name;
-              this.sex = this.sexs.filter(x => x.value == this.jobPost.requestSex)[0].name;
+              this.typeJob = this.typeJobs.filter(
+                (x) => x.value == this.jobPost.typeJob
+              )[0].name;
+              this.sex = this.sexs.filter(
+                (x) => x.value == this.jobPost.requestSex
+              )[0].name;
+            }
+
+            if(this.jobPost.companyId == user.company.companyId){
+              this.isPostOfCompany = true;
             }
           })
           .catch(() => {});
@@ -636,23 +667,17 @@ export default {
       this.jobPost.isFavourite = !this.jobPost.isFavourite;
       var user = JSON.parse(sessionStorage.getItem("user"));
       var param = {
-        UserId : user.id,
-        PostId : this.jobPost.postId
-      }
+        UserId: user.id,
+        PostId: this.jobPost.postId,
+      };
       axios
         .post("JobCare/updatejobcare", param)
         .then(() => {
-          this.showAlert(
-          "success",
-          "Thành công"
-        );
+          this.showAlert("success", "Thành công");
         })
         .catch(() => {
-          this.showAlert(
-          "error",
-          "Thất bại"
-        );
-        this.jobPost.isFavourite = !this.jobPost.isFavourite;
+          this.showAlert("error", "Thất bại");
+          this.jobPost.isFavourite = !this.jobPost.isFavourite;
         });
     },
 
@@ -662,7 +687,7 @@ export default {
     navigateCompany() {
       this.$router.push({
         name: "company-detail",
-        params: { companyID: this.$route.params.jobID  },
+        params: { companyID: this.$route.params.jobID },
       });
     },
     formatDate(date) {
